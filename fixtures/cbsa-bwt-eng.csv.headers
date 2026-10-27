@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+Date: Tue, 27 Oct 2026 17:26:18 GMT
+Server: Apache/2.4.6 (Red Hat Enterprise Linux) OpenSSL/1.0.2k-fips
+Set-Cookie: Apache=846862cb.65ed5be95ea59; path=/; domain=.cbsa-asfc.gc.ca
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Frame-Options: SAMEORIGIN
+Last-Modified: Tue, 27 Oct 2026 17:25:01 GMT
+ETag: "d32-65ed5b9f2b540"
+Accept-Ranges: bytes
+Content-Length: 3378
+Content-Type: text/csv
+

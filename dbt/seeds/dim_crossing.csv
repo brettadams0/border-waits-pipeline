@@ -1,0 +1,37 @@
+crossing_id,display_name,province,us_state,cbsa_iana_zone,cbp_iana_zone,cbsa_csv_name,cbsa_history_name,cbp_port_number,cbp_crossing_name,featured
+st_stephen,St. Stephen,NB,ME,America/Moncton,America/New_York,St. Stephen,St. Stephen,,,false
+st_stephen_3rd_bridge,St. Stephen 3rd Bridge,NB,ME,America/Moncton,America/New_York,St. Stephen 3rd Bridge,St. Stephen 3rd Bridge,,,false
+calais_ferry_point,Calais Ferry Point,NB,ME,America/Moncton,America/New_York,,,011501,Ferry Point,false
+calais_international_avenue,Calais International Avenue,NB,ME,America/Moncton,America/New_York,,,011503,International Avenue,false
+calais_milltown,Calais Milltown,NB,ME,America/Moncton,America/New_York,,,011502,Milltown,false
+edmundston,Edmundston,NB,ME,America/Moncton,America/New_York,Edmundston,Edmunston,L01901,,false
+woodstock_road,Woodstock Road,NB,ME,America/Moncton,America/New_York,Woodstock Road,Woodstock,010601,,false
+jackman,Jackman,,ME,,America/New_York,,,010401,,false
+stanstead,Stanstead,QC,VT,America/Toronto,America/New_York,Stanstead,Stanstead,020901,Derby Line I-91,false
+norton,Norton,,VT,,America/New_York,,,021101,,false
+st_armand_philipsburg,St-Armand/Philipsburg,QC,VT,America/Toronto,America/New_York,St-Armand/Philipsburg,St-Armand/Philipsburg,021201,,false
+lacolle_route_223,Lacolle: Route 223,QC,NY,America/Toronto,America/New_York,Lacolle: Route 223,,,,false
+lacolle_route_221,Lacolle: Route 221,QC,NY,America/Toronto,America/New_York,Lacolle: Route 221,,,,false
+st_bernard_de_lacolle,St-Bernard-de-Lacolle,QC,NY,America/Toronto,America/New_York,St-Bernard-de-Lacolle,St-Bernard-de-Lacolle,071201,,false
+hemmingford,Hemmingford,QC,NY,America/Toronto,America/New_York,Hemmingford,,,,false
+cornwall,Cornwall,ON,NY,America/Toronto,America/New_York,Cornwall Traffic Office,Cornwall,070401,,false
+prescott,Prescott,ON,NY,America/Toronto,America/New_York,Prescott,Prescott,070101,,false
+thousand_islands_bridge,Thousand Islands Bridge,ON,NY,America/Toronto,America/New_York,Thousand Islands Bridge,Thousand Islands Bridge,070801,Thousand Islands Bridge,false
+queenston_lewiston_bridge,Queenston-Lewiston Bridge,ON,NY,America/Toronto,America/New_York,Queenston-Lewiston Bridge,Queenston-Lewiston Bridge,090104,Lewiston Bridge,false
+whirlpool_bridge,Whirlpool Bridge,ON,NY,America/Toronto,America/New_York,,,090103,Whirlpool Bridge,false
+rainbow_bridge,Rainbow Bridge,ON,NY,America/Toronto,America/New_York,Rainbow Bridge,Rainbow Bridge,090102,Rainbow Bridge,false
+peace_bridge,Peace Bridge,ON,NY,America/Toronto,America/New_York,Peace Bridge,Peace Bridge,090101,Peace Bridge,false
+sault_ste_marie,Sault Ste. Marie,ON,MI,America/Toronto,America/Detroit,Sault Ste. Marie,Sault Ste. Marie,380301,International Bridge - SSM,false
+blue_water_bridge,Blue Water Bridge,ON,MI,America/Toronto,America/Detroit,Blue Water Bridge,Blue Water Bridge,380201,Bluewater Bridge,false
+detroit_windsor_tunnel,Detroit–Windsor Tunnel,ON,MI,America/Toronto,America/Detroit,Windsor and Detroit Tunnel,Windsor and Detroit Tunnel,380002,Windsor Tunnel,true
+ambassador_bridge,Ambassador Bridge,ON,MI,America/Toronto,America/Detroit,Ambassador Bridge,Ambassador Bridge,380001,Ambassador Bridge,true
+gordie_howe_bridge,Gordie Howe International Bridge,ON,MI,America/Toronto,America/Detroit,Gordie Howe International Bridge,,380102,Gordie Howe International Bridge,true
+fort_frances,Fort Frances,ON,MN,America/Winnipeg,America/Chicago,Fort Frances Bridge,Fort Frances,360401,,false
+emerson,Emerson,MB,ND,America/Winnipeg,America/Chicago,Emerson,Emerson,340101,,false
+north_portal,North Portal,SK,ND,America/Regina,America/Chicago,North Portal,North Portal,,,false
+coutts,Coutts,AB,MT,America/Edmonton,America/Denver,Coutts,Coutts,331001,,false
+abbotsford_huntingdon,Abbotsford-Huntingdon,BC,WA,America/Vancouver,America/Los_Angeles,Abbotsford-Huntingdon,Abbotsford-Huntingdon,300901,,false
+aldergrove,Aldergrove,BC,WA,America/Vancouver,America/Los_Angeles,Aldergrove,Aldergrove,302301,,false
+pacific_highway,Pacific Highway,BC,WA,America/Vancouver,America/Los_Angeles,Pacific Highway,Pacific Highway,300401,Pacific Highway,false
+douglas,Douglas (Peace Arch),BC,WA,America/Vancouver,America/Los_Angeles,Douglas,Douglas (Peace Arch),300402,Peace Arch,false
+boundary_bay,Boundary Bay,BC,WA,America/Vancouver,America/Los_Angeles,Boundary Bay,Boundary Bay,300403,Point Roberts,false

@@ -1,0 +1,17 @@
+HTTP/2 200 
+content-type: application/xml; charset=utf-8
+server: istio-envoy
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+content-security-policy: font-src 'self';img-src 'self' data:; frame-ancestors 'self'; default-src:'self'
+referrer-policy: strict-origin
+x-correlation-id: 0HNPIIPP2GKFK:0000000C
+x-session-id: 
+x-envoy-upstream-service-time: 17
+expires: Tue, 27 Oct 2026 17:26:19 GMT
+cache-control: max-age=0, no-cache, no-store
+pragma: no-cache
+date: Tue, 27 Oct 2026 17:26:19 GMT
+strict-transport-security: max-age=31536000 ; includeSubDomains
+
