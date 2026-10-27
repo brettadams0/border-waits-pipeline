@@ -4,7 +4,7 @@ bwt:
   outputs:
     local:
       type: duckdb
-      path: target/bwt.duckdb
+      path: "{{ env_var('BWT_DB', 'target/bwt.duckdb') }}"
       threads: 1
       settings:
         TimeZone: UTC
