@@ -54,3 +54,26 @@ def test_bad_current_run_fails(tmp_path):
     write_parquet(bad, run_paths(tmp_path / "ds", "cbsa", "2026-10-27T17:26:20Z")[0])
     rc, status, _ = build(tmp_path, "102-1")
     assert rc != 0 and status.get("fail", 0) >= 1, status
+
+
+def test_export_after_good_build(tmp_path):
+    import hashlib
+    from export import __main__ as export
+    datastore(tmp_path)
+    assert cli.main(["--run-id", "103-1", "--fixtures", "--datastore", str(tmp_path / "ds"),
+                     "--raw-dir", str(tmp_path / "raw"), "--fetched-at", "2026-10-27T17:26:20Z"]) == 0
+    rc, _, _ = build(tmp_path, "103-1")
+    assert rc == 0
+    out = tmp_path / "public" / "data" / "v1"
+    assert export.main(["--run-id", "103-1", "--db", str(tmp_path / "bwt.duckdb"), "--dbt-target", str(tmp_path / "target"),
+                        "--out", str(out), "--datastore", str(tmp_path / "ds"), "--previous", str(tmp_path / "none")]) == 0
+    m = json.loads((out / "manifest.json").read_text())
+    for name, f in m["files"].items():
+        body = (out / f["url"]).read_bytes()
+        assert hashlib.sha256(body).hexdigest() == f["sha256"], name
+        assert f["sha256"][:8] in f["url"] or name == "summary", name
+    assert m["files"]["summary"]["bytes"] <= 30_000
+    assert m["tests"]["error"] == 0
+    assert m["rebuild_check"]["expected"] == export.rebuild_check(
+        (out / m["files"]["sql/agg_wait_by_hour"]["url"]).read_text(), out / m["files"]["fct_wait_readings_recent"]["url"])
+    assert "Open Government Licence – Canada" in (out / "index.html").read_text()
