@@ -1,0 +1,149 @@
+name: pipeline
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      fixtures:
+        description: "Use the fixtures instead of the network (testing)"
+        type: boolean
+        default: false
+      fail_ingest:
+        description: "Force ingest to fail (tests the failure path)"
+        type: boolean
+        default: false
+
+concurrency: pipeline
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: write
+
+env:
+  RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          ref: data
+          path: datastore
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Ingest
+        run: |
+          start=$(date +%s); echo "START=$start" >> "$GITHUB_ENV"
+          if [ "${{ inputs.fail_ingest }}" = "true" ]; then echo "forced failure"; exit 1; fi
+          before=$(du -sb datastore --exclude=.git | cut -f1)
+          python -m ingest --run-id "$RUN_ID" ${{ inputs.fixtures && '--fixtures' || '' }}
+          # the CBSA history: once a day
+          if [ "$(date -u +%H)" = "06" ] || [ ! -d datastore/history/cbsa_land ]; then python -m ingest.history; fi
+          echo "SNAPSHOT_BYTES=$(( $(du -sb datastore --exclude=.git | cut -f1) - before ))" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: raw-${{ env.RUN_ID }}
+          path: raw-artifact
+          retention-days: 14
+
+      - name: dbt build
+        working-directory: dbt
+        run: |
+          dbt build --profiles-dir . --vars "{run_id: $RUN_ID, datastore: ../datastore}" --exclude tag:freshness
+
+      - name: Freshness (never blocks)
+        working-directory: dbt
+        continue-on-error: true
+        run: |
+          dbt test --profiles-dir . --vars "{run_id: $RUN_ID, datastore: ../datastore}" --select tag:freshness --target-path target-freshness
+
+      - name: Export and docs
+        run: |
+          python -m export --run-id "$RUN_ID" --run-url "$RUN_URL" --git-sha "$GITHUB_SHA" \
+            --data-sha "$(git -C datastore rev-parse HEAD)" --run-seconds "$(( $(date +%s) - START ))" \
+            --snapshot-bytes "$SNAPSHOT_BYTES"
+          (cd dbt && dbt docs generate --static --profiles-dir . --vars "{datastore: ../datastore}")
+          mkdir -p public/docs && cp dbt/target/static_index.html public/docs/index.html
+
+      - name: Commit the run to the data branch
+        run: |
+          rm -rf datastore/published && mkdir -p datastore/published && cp -r public/data datastore/published/
+          cd datastore
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "run $RUN_ID"
+          git push -q origin HEAD:data
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+      - uses: actions/deploy-pages@v5
+
+      - name: Close the failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --state open --label pipeline-failing --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Recovered in $RUN_URL"
+          done
+
+  on-failure:
+    needs: run
+    if: failure()
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: data
+          path: datastore
+          fetch-depth: 1
+
+      - name: Last good export with an honest status.json
+        run: |
+          mkdir -p public && cp -r datastore/published/data public/
+          step=$(gh run view ${{ github.run_id }} --repo ${{ github.repository }} --json jobs \
+            --jq '[.jobs[] | select(.name == "run") | .steps[] | select(.conclusion == "failure") | .name][0] // "unknown"')
+          printf '{"run_id": "%s", "time": "%s", "result": "failure", "failed_step": "%s", "run_url": "%s",\n "last_success": %s}\n' \
+            "$RUN_ID" "$(date -u +%FT%TZ)" "$step" "$RUN_URL" "$(cat datastore/published/data/v1/status.json)" \
+            > public/data/v1/status.json
+          echo "STEP=$step" >> "$GITHUB_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+      - uses: actions/deploy-pages@v5
+
+      - name: Open or update the failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create pipeline-failing --repo ${{ github.repository }} --color d73a4a 2>/dev/null || true
+          n=$(gh issue list --repo ${{ github.repository }} --state open --label pipeline-failing --json number --jq '.[0].number')
+          msg="Run $RUN_ID failed at step: $STEP. $RUN_URL"
+          if [ -n "$n" ]; then gh issue comment "$n" --repo ${{ github.repository }} --body "$msg";
+          else gh issue create --repo ${{ github.repository }} --label pipeline-failing --title "pipeline failing" --body "$msg"; fi

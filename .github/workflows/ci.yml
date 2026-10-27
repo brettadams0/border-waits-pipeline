@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # No network: parsers, contracts, per-run checks, dbt build on fixture-built
+      # snapshots (unit tests included), the bad-old-snapshot case and the export.
+      - name: pytest
+        run: python -m pytest -q
