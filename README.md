@@ -57,7 +57,7 @@ cd dbt && ../.venv/bin/dbt build --profiles-dir . --vars "{run_id: local-1}"
 
 ## Operations
 
-- **Quarantine a bad snapshot:** add its path (as `filename` shows it) and a reason to
+- **Quarantine a bad snapshot:** add its path on the `data` branch (`snapshots/...`) and a reason to
   `dbt/seeds/excluded_snapshots.csv`. Staging skips it; the `data` branch isn't rewritten.
 - **New crossing name:** `unmatched_crossings` warns with the name; add a `dim_crossing` row.
 - **Schedule auto-disable:** GitHub disables scheduled workflows in a public repo after 60 days with no

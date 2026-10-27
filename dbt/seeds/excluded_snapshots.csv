@@ -1,1 +1,3 @@
 path,reason
+snapshots/source=cbp/date=2026-10-27/190228.parquet,"fixtures dispatch (run 40565402162-1): test of the deploy path; fetched_at is the run time, not when the fixture was fetched"
+snapshots/source=cbsa/date=2026-10-27/190228.parquet,"fixtures dispatch (run 40565402162-1): test of the deploy path; fetched_at is the run time, not when the fixture was fetched"

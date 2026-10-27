@@ -2,7 +2,10 @@
 -- source's published local time to an instant in that side's zone.
 with raw as (
     select * from {{ source('raw', 'readings') }}
-    where filename not in (select path from {{ ref('excluded_snapshots') }})
+    -- excluded_snapshots.path is the path on the data branch (snapshots/...); filename carries the datastore prefix
+    where not exists (
+        select 1 from {{ ref('excluded_snapshots') }} x
+        where filename = x.path or ends_with(filename, '/' || x.path))
       and lane_type = 'standard'
 ),
 
