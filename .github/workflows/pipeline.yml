@@ -1,6 +1,7 @@
 name: pipeline
 
 on:
+  # schedule: hourly at :17 (UTC)
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
