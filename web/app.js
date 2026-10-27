@@ -118,6 +118,22 @@ function renderHow({ manifest: m }) {
   $('how').innerHTML = blocks.map(([h, p]) => `<div><h3>${h}</h3><p>${p}</p></div>`).join('');
 }
 
+// "Collecting data since" and the live badge come from the export's manifest and
+// status.json (the earliest stored reading, and the last run), never typed in.
+function renderCollecting({ manifest: m, status, live }) {
+  if (m.collecting_since) {
+    $('collecting').hidden = false;
+    const since = localTime(m.collecting_since); // en-CA times end in "p.m."; don't add a second period
+    $('collecting').textContent = `Collecting data since ${since}${since.endsWith('.') ? '' : '.'} The by-hour charts fill in as readings accumulate.`;
+  }
+  if (!live) return;
+  const last = toDate(status?.time || m.generated_at);
+  const min = Math.max(0, Math.round((Date.now() - last) / 6e4));
+  const ago = min < 60 ? `${min} min ago` : `${Math.round(min / 60)} h ago`;
+  $('live-badge').hidden = false;
+  $('live-badge').innerHTML = `<span class="badge ${status?.result === 'failure' ? 'error' : 'pass'}">live</span> last run ${esc(ago)} · ${m.files.fct_wait_readings.rows.toLocaleString('en-CA')} readings`;
+}
+
 function setupPickers(data) {
   $('pick-crossing').innerHTML = data.summary.crossings.map((c) => `<option value="${esc(c.crossing_id)}">${esc(c.display_name)}</option>`).join('');
   for (const id of ['pick-crossing', 'pick-direction', 'pick-lane']) $(id).addEventListener('change', () => renderChart(data));
@@ -133,6 +149,7 @@ setupPickers(data);
 renderNow(data);
 renderChart(data);
 renderPipeline(data);
+renderCollecting(data);
 renderHow(data);
 $('sql-load').addEventListener('click', async () => {
   $('sql-load').disabled = true;

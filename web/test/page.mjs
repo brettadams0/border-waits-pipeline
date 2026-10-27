@@ -41,6 +41,8 @@ for (const [w, h] of [[390, 844], [1440, 900]]) {
     note: document.getElementById('data-note').textContent, sql: !document.getElementById('sql-load').disabled, zeros: [...document.querySelectorAll('#now-table td.num')].filter((td) => td.textContent === '0').length }));
   out(`w${w} live: no errors, no sideways scroll`, errors.length === 0 && g.sw === w, { errors, sw: g.sw });
   out(`w${w} live: 3 crossings, chart, pipeline, SQL enabled, no fallback note`, g.now === 3 && g.chart && g.pipe && g.sql && g.note === '', g);
+  const extra = await p.evaluate(() => [document.getElementById('collecting').textContent, document.getElementById('live-badge').textContent]);
+  out(`w${w} live: "Collecting data since" and the live badge, both from the manifest`, /^Collecting data since \w/.test(extra[0]) && /^live last run \d+ (min|h) ago · [\d,]+ readings$/.test(extra[1]), extra);
   out(`w${w} live: nothing from jsDelivr or extensions.duckdb.org before the click`, !reqs.some((u) => /jsdelivr|extensions\.duckdb/.test(u)), reqs.filter((u) => !u.includes('127.0.0.1')));
   if (withSql && w === 1440) {
     const before = reqs.length;

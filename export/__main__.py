@@ -137,6 +137,8 @@ def main(argv=None):
         "schema_version": 1,
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "run_id": a.run_id, "run_url": a.run_url, "git_sha": a.git_sha, "data_sha": a.data_sha,
+        # the earliest stored reading: what the page's "Collecting data since" line shows
+        "collecting_since": str(con.execute("select min(fetched_at) from main.fct_wait_readings").fetchone()[0]),
         "duckdb_version": duckdb.__version__, "dbt_version": _dbt_version(),
         "files": files,
         "sources": sources,

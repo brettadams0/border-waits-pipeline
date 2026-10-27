@@ -291,4 +291,4 @@ summary { cursor: pointer; min-height: 44px; display: flex; align-items: center;
 textarea { width: 100%; min-height: 9em; padding: 8px; }
 .console-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
 [role="status"] { margin: 8px 0; color: var(--soft); font-size: var(--fs-sm); min-height: 1.4em; }
-.foot { margin: 28px 0; color: var(--muted); font-size: var(--fs-sm); }
+.live-badge { margin: 8px 0 0; color: var(--soft); font: var(--fs-sm)/1.5 var(--mono); }
