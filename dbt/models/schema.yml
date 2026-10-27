@@ -1,0 +1,68 @@
+version: 2
+
+x-run: &run {where: "{% if var('run_id') %}run_id = '{{ var('run_id') }}'{% else %}true{% endif %}"}
+
+models:
+  - name: stg_readings
+    description: Stored runs, standard lane groups, with each source's local time resolved to an instant.
+    data_tests:
+      # Freshness: how far each source's newest update is behind the run's fetch.
+      # Thresholds estimated; never blocks a deploy (run with --select tag:freshness).
+      - source_lag: {name: freshness_warn_cbsa, arguments: {source_value: cbsa, max_minutes: 120}, config: {severity: warn, tags: [freshness]}}
+      - source_lag: {name: freshness_error_cbsa, arguments: {source_value: cbsa, max_minutes: 360}, config: {tags: [freshness]}}
+      - source_lag: {name: freshness_warn_cbp, arguments: {source_value: cbp, max_minutes: 120}, config: {severity: warn, tags: [freshness]}}
+      - source_lag: {name: freshness_error_cbp, arguments: {source_value: cbp, max_minutes: 360}, config: {tags: [freshness]}}
+      - min_distinct_per_run: {arguments: {column_name: source_crossing_name, source_value: cbsa, minimum: 25}}
+      - min_distinct_per_run: {arguments: {column_name: cbp_port_number, source_value: cbp, minimum: 25}}
+    columns:
+      - name: source
+        data_tests:
+          - not_null: {config: *run}
+          - accepted_values: {arguments: {values: [cbsa, cbp]}, config: *run}
+          - not_null: {name: warn_history_source_not_null, config: {severity: warn}}
+      - name: direction
+        data_tests:
+          - not_null: {config: *run}
+          - accepted_values: {arguments: {values: [to_canada, to_us]}, config: *run}
+          - accepted_values: {name: warn_history_direction, arguments: {values: [to_canada, to_us]}, config: {severity: warn}}
+      - name: lane
+        data_tests:
+          - not_null: {config: *run}
+          - accepted_values: {arguments: {values: [travellers, commercial]}, config: *run}
+          - accepted_values: {name: warn_history_lane, arguments: {values: [travellers, commercial]}, config: {severity: warn}}
+      - name: lane_type
+        data_tests:
+          - not_null: {config: *run}
+          - accepted_values: {arguments: {values: [standard, nexus_sentri, fast, ready]}, config: *run}
+      - name: delay_min
+        data_tests:
+          - between: {arguments: {min_value: 0, max_value: 720}, config: *run}
+          - between: {name: warn_history_delay_0_720, arguments: {min_value: 0, max_value: 720}, config: {severity: warn}}
+          - between: {name: warn_delay_above_240, arguments: {min_value: 0, max_value: 240}, config: {severity: warn}}
+      - name: tz_abbrev_matches_zone
+        description: False when the published abbreviation disagrees with the zone (Port Huron's EST in October).
+        data_tests:
+          - accepted_values: {name: warn_tz_abbrev_matches_zone, arguments: {values: [true]}, config: {severity: warn}}
+
+  - name: int_readings_matched
+    columns:
+      - name: crossing_id
+        data_tests:
+          - relationships: {arguments: {to: ref('dim_crossing'), field: crossing_id}, config: *run}
+
+  - name: unmatched_crossings
+    description: Names that need a dim_crossing row. The pipeline keeps running; this warns.
+    data_tests:
+      - is_empty: {config: {severity: warn}}
+
+  - name: stg_cbsa_land_monthly
+    columns:
+      - name: pct_met
+        data_tests:
+          - not_null
+          - between: {arguments: {min_value: 0, max_value: 100}}
+
+  - name: fct_service_standard_monthly
+    columns:
+      - name: month_start
+        data_tests: [not_null]

@@ -1,0 +1,68 @@
+version: 2
+
+x-xing: &xing
+  input: ref('dim_crossing')
+  rows:
+    - {crossing_id: ambassador_bridge, cbsa_iana_zone: America/Toronto, cbp_iana_zone: America/Detroit, cbsa_csv_name: Ambassador Bridge, cbp_port_number: "380001"}
+    - {crossing_id: blue_water_bridge, cbsa_iana_zone: America/Toronto, cbp_iana_zone: America/Detroit, cbsa_csv_name: Blue Water Bridge, cbp_port_number: "380201"}
+x-excl: &excl
+  input: ref('excluded_snapshots')
+  format: sql
+  rows: "select cast(null as varchar) as path, cast(null as varchar) as reason where false"
+
+unit_tests:
+  - name: stg_readings_timestamps
+    model: stg_readings
+    given:
+      # r1, r2: midnight rollover at 23:55 and 00:05; r3: Port Huron's EST against the zone;
+      # r4, r5: 01:30 on 2026-11-01 happens twice; r6: 02:30 on 2027-03-14 doesn't exist
+      - input: source('raw', 'readings')
+        format: sql
+        rows: |
+          select 'r1'::varchar as run_id, 1 as schema_version, timestamptz '2026-10-28 04:10:00+00' as fetched_at, 'cbp'::varchar as source, null::varchar as source_crossing_name, null::varchar as source_location, '380001'::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '10/28/2026 At 11:55 pm EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r2'::varchar as run_id, 1 as schema_version, timestamptz '2026-10-28 04:10:00+00' as fetched_at, 'cbp'::varchar as source, null::varchar as source_crossing_name, null::varchar as source_location, '380001'::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '10/28/2026 At 12:05 am EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r3'::varchar as run_id, 1 as schema_version, timestamptz '2026-10-27 17:26:00+00' as fetched_at, 'cbp'::varchar as source, null::varchar as source_crossing_name, null::varchar as source_location, '380201'::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '10/27/2026 At 1:00 pm EST'::varchar as source_updated_raw, 'EST'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r4'::varchar as run_id, 1 as schema_version, timestamptz '2026-11-01 07:00:00+00' as fetched_at, 'cbsa'::varchar as source, 'Ambassador Bridge'::varchar as source_crossing_name, null::varchar as source_location, null::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '2026-11-01 01:30 EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r5'::varchar as run_id, 1 as schema_version, timestamptz '2026-11-01 07:00:00+00' as fetched_at, 'cbsa'::varchar as source, 'Ambassador Bridge'::varchar as source_crossing_name, null::varchar as source_location, null::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '2026-11-01 01:30 EST'::varchar as source_updated_raw, 'EST'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r6'::varchar as run_id, 1 as schema_version, timestamptz '2027-03-14 08:00:00+00' as fetched_at, 'cbsa'::varchar as source, 'Ambassador Bridge'::varchar as source_crossing_name, null::varchar as source_location, null::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '2027-03-14 02:30 EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
+      - *xing
+      - *excl
+    expect:
+      rows:
+        - {run_id: r1, source_updated_at: "2026-10-28 03:55:00+00", tz_resolved_by: zone, tz_abbrev_matches_zone: true}
+        - {run_id: r2, source_updated_at: "2026-10-28 04:05:00+00", tz_resolved_by: zone, tz_abbrev_matches_zone: true}
+        - {run_id: r3, source_updated_at: "2026-10-27 17:00:00+00", tz_resolved_by: zone, tz_abbrev_matches_zone: false}
+        - {run_id: r4, source_updated_at: "2026-11-01 05:30:00+00", tz_resolved_by: abbrev, tz_abbrev_matches_zone: true}
+        - {run_id: r5, source_updated_at: "2026-11-01 06:30:00+00", tz_resolved_by: abbrev, tz_abbrev_matches_zone: true}
+        - {run_id: r6, source_updated_at: "2027-03-14 07:30:00+00", tz_resolved_by: rule, tz_abbrev_matches_zone: true}
+
+  - name: fct_wait_readings_keeps_earliest_fetch
+    model: fct_wait_readings
+    given:
+      - input: ref('int_readings_matched')
+        rows:
+          - {run_id: a, crossing_id: ambassador_bridge, direction: to_us, lane: travellers, source_updated_at: "2026-10-27 17:00:00+00", fetched_at: "2026-10-27 18:17:00+00", delay_min: 10}
+          - {run_id: b, crossing_id: ambassador_bridge, direction: to_us, lane: travellers, source_updated_at: "2026-10-27 17:00:00+00", fetched_at: "2026-10-27 17:17:00+00", delay_min: 10}
+    expect:
+      rows:
+        - {run_id: b, fetched_at: "2026-10-27 17:17:00+00"}
+
+  - name: fct_service_standard_january_is_second_year
+    model: fct_service_standard_monthly
+    given:
+      - input: ref('stg_cbsa_land_monthly')
+        rows:
+          - {port_of_entry: Ambassador Bridge, month_name: January, fiscal_year: 2019-20, pct_met: 99.5}
+          - {port_of_entry: Ambassador Bridge, month_name: April, fiscal_year: 2019-20, pct_met: 98.0}
+      - input: ref('dim_crossing')
+        rows:
+          - {crossing_id: ambassador_bridge, cbsa_history_name: Ambassador Bridge}
+    expect:
+      rows:
+        - {month_start: 2019-04-01, crossing_id: ambassador_bridge}
+        - {month_start: 2020-01-01, crossing_id: ambassador_bridge}

@@ -1,0 +1,23 @@
+name: border_waits
+version: "1.0.0"
+profile: bwt
+config-version: 2
+
+vars:
+  run_id: ""
+  datastore: "../datastore"
+
+seeds:
+  border_waits:
+    dim_crossing:
+      +column_types:
+        cbp_port_number: varchar
+        featured: boolean
+    excluded_snapshots:
+      +column_types:
+        path: varchar
+        reason: varchar
+
+models:
+  border_waits:
+    +materialized: table

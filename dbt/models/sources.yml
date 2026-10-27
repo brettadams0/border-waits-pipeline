@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: main
+    tables:
+      - name: readings
+        description: Every stored run, one Parquet file per source per run on the data branch.
+        config:
+          external_location: >-
+            read_parquet('{{ var("datastore") }}/snapshots/**/*.parquet',
+            hive_partitioning = true, union_by_name = true, filename = true)
+      - name: cbsa_land_history
+        description: CBSA historical service-standard CSVs, one per CKAN metadata_modified; staging keeps the newest.
+        config:
+          external_location: >-
+            read_csv('{{ var("datastore") }}/history/cbsa_land/*.csv', header = true, all_varchar = true, filename = true)

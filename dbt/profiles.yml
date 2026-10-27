@@ -1,0 +1,10 @@
+# The database file must stay bwt.duckdb: the browser's rebuild check attaches the name `bwt`.
+bwt:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: target/bwt.duckdb
+      threads: 1
+      settings:
+        TimeZone: UTC
