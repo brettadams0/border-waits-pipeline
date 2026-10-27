@@ -122,7 +122,6 @@ function renderHow({ manifest: m }) {
 // status.json (the earliest stored reading, and the last run), never typed in.
 function renderCollecting({ manifest: m, status, live }) {
   if (m.collecting_since) {
-    $('collecting').hidden = false;
     const since = localTime(m.collecting_since); // en-CA times end in "p.m."; don't add a second period
     $('collecting').textContent = `Collecting data since ${since}${since.endsWith('.') ? '' : '.'} The by-hour charts fill in as readings accumulate.`;
   }
@@ -130,7 +129,6 @@ function renderCollecting({ manifest: m, status, live }) {
   const last = toDate(status?.time || m.generated_at);
   const min = Math.max(0, Math.round((Date.now() - last) / 6e4));
   const ago = min < 60 ? `${min} min ago` : `${Math.round(min / 60)} h ago`;
-  $('live-badge').hidden = false;
   $('live-badge').innerHTML = `<span class="badge ${status?.result === 'failure' ? 'error' : 'pass'}">live</span> last run ${esc(ago)} · ${m.files.fct_wait_readings.rows.toLocaleString('en-CA')} readings`;
 }
 

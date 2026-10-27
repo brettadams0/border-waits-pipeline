@@ -292,3 +292,9 @@ textarea { width: 100%; min-height: 9em; padding: 8px; }
 .console-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
 [role="status"] { margin: 8px 0; color: var(--soft); font-size: var(--fs-sm); min-height: 1.4em; }
 .live-badge { margin: 8px 0 0; color: var(--soft); font: var(--fs-sm)/1.5 var(--mono); }
+/* Reserved space, so nothing moves when the data arrives (CLS). */
+#data-note, #live-badge, #collecting { min-height: 1.5em; }
+#chart { aspect-ratio: 3 / 1; }
+#chart-days { min-height: 3em; }
+#pipeline { min-height: 12em; }
+#how { min-height: 10em; }
