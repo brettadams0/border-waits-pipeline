@@ -66,6 +66,21 @@ cd dbt && ../.venv/bin/dbt build --profiles-dir . --vars "{run_id: local-1}"
 - **First run:** the `data` branch must exist (an orphan branch with an empty commit) before the
   first scheduled run.
 
+## What the feeds actually do
+
+Seen in the live feeds and handled in the code (each has a test):
+- CBSA listed 30 crossings on 2026-10-27 (Gordie Howe included).
+- CBP writes noon as `At Noon EDT`.
+- CBP stamps an update with the coming hour: fetched at 15:53 EDT, several ports said `At 4:00 pm EDT`.
+  Some ports run further ahead (International Falls `At 4:00 pm CDT`, 67 min after the fetch; Norton
+  `At 8:00 pm EDT`, 4 h after). These keep their published time and show as the
+  `warn_source_updated_ahead` warning; only a time a day or more ahead fails the build.
+- A late-evening CBP time fetched after local midnight belongs to the day before (published ≥ 20:00,
+  fetch < 04:00 local).
+- Port Huron's abbreviation can disagree with its zone (`EST` in October); the zone decides.
+- The two sides of a crossing can be in different zones (New Brunswick on Atlantic time, Maine on
+  Eastern), so `dim_crossing` has a zone per side.
+
 ## The page
 
 `web/` holds the page that brettadams0.github.io serves at `/border-waits/`; the site copies it from

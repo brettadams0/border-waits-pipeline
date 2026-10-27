@@ -5,6 +5,7 @@ x-xing: &xing
   rows:
     - {crossing_id: ambassador_bridge, cbsa_iana_zone: America/Toronto, cbp_iana_zone: America/Detroit, cbsa_csv_name: Ambassador Bridge, cbp_port_number: "380001"}
     - {crossing_id: blue_water_bridge, cbsa_iana_zone: America/Toronto, cbp_iana_zone: America/Detroit, cbsa_csv_name: Blue Water Bridge, cbp_port_number: "380201"}
+    - {crossing_id: fort_frances, cbsa_iana_zone: America/Winnipeg, cbp_iana_zone: America/Chicago, cbsa_csv_name: Fort Frances Bridge, cbp_port_number: "360401"}
 x-excl: &excl
   input: ref('excluded_snapshots')
   format: sql
@@ -15,7 +16,9 @@ unit_tests:
     model: stg_readings
     given:
       # r1, r2: midnight rollover at 23:55 and 00:05; r3: Port Huron's EST against the zone;
-      # r4, r5: 01:30 on 2026-11-01 happens twice; r6: 02:30 on 2027-03-14 doesn't exist
+      # r4, r5: 01:30 on 2026-11-01 happens twice; r6: 02:30 on 2027-03-14 doesn't exist;
+      # r7-r9, from run 40573055990 (fetched 19:53Z = 15:53 EDT): CBP's coming-hour 'At 4:00 pm EDT' (+7 min),
+      # a Central port's 'At 4:00 pm CDT' (+67 min) and 'At 8:00 pm EDT' (+4 h) all keep their published time
       - input: source('raw', 'readings')
         format: sql
         rows: |
@@ -30,6 +33,12 @@ unit_tests:
           select 'r5'::varchar as run_id, 1 as schema_version, timestamptz '2026-11-01 07:00:00+00' as fetched_at, 'cbsa'::varchar as source, 'Ambassador Bridge'::varchar as source_crossing_name, null::varchar as source_location, null::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '2026-11-01 01:30 EST'::varchar as source_updated_raw, 'EST'::varchar as source_tz_abbrev, 'f'::varchar as filename
           union all
           select 'r6'::varchar as run_id, 1 as schema_version, timestamptz '2027-03-14 08:00:00+00' as fetched_at, 'cbsa'::varchar as source, 'Ambassador Bridge'::varchar as source_crossing_name, null::varchar as source_location, null::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '2027-03-14 02:30 EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r7'::varchar as run_id, 1 as schema_version, timestamptz '2026-10-27 19:53:19+00' as fetched_at, 'cbp'::varchar as source, null::varchar as source_crossing_name, null::varchar as source_location, '380001'::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '10/27/2026 At 4:00 pm EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r8'::varchar as run_id, 1 as schema_version, timestamptz '2026-10-27 19:53:19+00' as fetched_at, 'cbp'::varchar as source, null::varchar as source_crossing_name, null::varchar as source_location, '360401'::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '10/27/2026 At 4:00 pm CDT'::varchar as source_updated_raw, 'CDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
+          union all
+          select 'r9'::varchar as run_id, 1 as schema_version, timestamptz '2026-10-27 19:53:19+00' as fetched_at, 'cbp'::varchar as source, null::varchar as source_crossing_name, null::varchar as source_location, '380001'::varchar as cbp_port_number, null::varchar as port_status, null::varchar as direction, null::varchar as lane, 'standard'::varchar as lane_type, null::varchar as status_raw, null::integer as delay_min, null::boolean as is_open, null::integer as lanes_open, '10/27/2026 At 8:00 pm EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'f'::varchar as filename
       - *xing
       - *excl
     expect:
@@ -40,6 +49,9 @@ unit_tests:
         - {run_id: r4, source_updated_at: "2026-11-01 05:30:00+00", tz_resolved_by: abbrev, tz_abbrev_matches_zone: true}
         - {run_id: r5, source_updated_at: "2026-11-01 06:30:00+00", tz_resolved_by: abbrev, tz_abbrev_matches_zone: true}
         - {run_id: r6, source_updated_at: "2027-03-14 07:30:00+00", tz_resolved_by: rule, tz_abbrev_matches_zone: true}
+        - {run_id: r7, source_updated_at: "2026-10-27 20:00:00+00", tz_resolved_by: zone, tz_abbrev_matches_zone: true}
+        - {run_id: r8, source_updated_at: "2026-10-27 21:00:00+00", tz_resolved_by: zone, tz_abbrev_matches_zone: true}
+        - {run_id: r9, source_updated_at: "2026-10-28 00:00:00+00", tz_resolved_by: zone, tz_abbrev_matches_zone: true}
 
   - name: fct_wait_readings_keeps_earliest_fetch
     model: fct_wait_readings

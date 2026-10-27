@@ -33,13 +33,16 @@ offsets as (
     from zoned
 ),
 
--- CBP gives a time on the port's date: a time more than 15 minutes after the
--- fetch belongs to the day before (midnight rollover).
+-- CBP gives a time on the port's date: a late-evening time more than 15 minutes
+-- after an early-morning fetch belongs to the day before (midnight rollover).
+-- CBP also stamps updates with the coming hour ('At 4:00 pm' fetched at 15:53),
+-- so other times a little ahead of the fetch are kept as published.
 rolled as (
     select
         * exclude (local_raw),
         case
             when source = 'cbp' and timezone('UTC', local_raw - greatest(o1, o2)) > fetched_at + interval 15 minute
+                 and hour(local_raw) >= 20 and hour(timezone(iana_zone, fetched_at)) < 4
                 then local_raw - interval 1 day
             else local_raw
         end as local_updated
