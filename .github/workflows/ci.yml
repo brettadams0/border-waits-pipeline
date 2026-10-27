@@ -25,3 +25,22 @@ jobs:
       # snapshots (unit tests included), the bad-old-snapshot case and the export.
       - name: pytest
         run: python -m pytest -q
+
+      # The page against a fixture export (no network: the SQL load is checked locally with --sql).
+      - name: Export from fixtures
+        run: |
+          mkdir -p datastore/history/cbsa_land
+          cp fixtures/cbsa-history.csv "datastore/history/cbsa_land/2025-12-18T22:31:02.377918.csv"
+          python -m ingest --run-id ci-1 --fixtures
+          (cd dbt && dbt build --profiles-dir . --vars "{run_id: ci-1, datastore: ../datastore}" --exclude tag:freshness)
+          python -m export --run-id ci-1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+
+      - name: Page tests
+        run: |
+          npm install -g playwright@1.56.1
+          playwright install --with-deps chromium
+          NODE_PATH="$(npm root -g)" node web/test/page.mjs public/data/v1

@@ -78,6 +78,7 @@ def main(argv=None):
     ap.add_argument("--data-sha", default="")
     ap.add_argument("--run-seconds", type=float, default=None)
     ap.add_argument("--snapshot-bytes", type=int, default=None)
+    ap.add_argument("--snapshot", help="also copy manifest.json and the summary here (the page's fallback/)")
     a = ap.parse_args(argv)
     out = Path(a.out)
     if out.exists():
@@ -105,6 +106,7 @@ def main(argv=None):
     rows = lambda q: [dict(zip([d[0] for d in con.description], r)) for r in con.execute(q).fetchall()]
     summary = {
         "run_id": a.run_id,
+        "crossings": rows("select crossing_id, display_name from main.dim_crossing where featured order by crossing_id"),
         "latest": rows(f"""select crossing_id, direction, lane, arg_max(delay_min, source_updated_at) as delay_min,
             arg_max(is_open, source_updated_at) as is_open, arg_max(status_raw, source_updated_at) as status_raw,
             max(source_updated_at)::varchar as source_updated_at from main.fct_wait_readings where {featured} group by all order by all"""),
@@ -124,6 +126,10 @@ def main(argv=None):
         lag = round((last_fetch - newest).total_seconds() / 60) if last_fetch and newest else None
         sources[s] = {**meta, "last_fetched_at": str(last_fetch), "newest_source_updated_at": str(newest), "lag_minutes": lag,
                       "freshness": None if lag is None else "error" if lag > 360 else "warn" if lag > 120 else "pass"}
+    hist = sorted((Path(a.datastore) / "history" / "cbsa_land").glob("*.csv"))
+    sources["cbsa_history"] = {"url": "https://open.canada.ca/data/en/dataset/000fe5aa-1d77-42d1-bfe7-458c51dacfef",
+                               "licence": SOURCES["cbsa"]["licence"], "attribution": SOURCES["cbsa"]["attribution"],
+                               "metadata_modified": hist[-1].stem if hist else None}
     counts, warnings = test_counts([Path(a.dbt_target) / "run_results.json", a.freshness_results])
     recent_sql = (compiled / "agg_wait_by_hour.sql").read_text()
     datastore = Path(a.datastore)
@@ -153,6 +159,11 @@ def main(argv=None):
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1, default=str))
     (out / "status.json").write_text(json.dumps({"run_id": a.run_id, "time": manifest["generated_at"], "result": "success"}, indent=1))
     (out / "index.html").write_text(INDEX)
+    if a.snapshot:
+        snap = Path(a.snapshot)
+        snap.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(out / "manifest.json", snap / "manifest.json")
+        shutil.copyfile(summary_path, snap / "summary.json")
     print(f"exported {len(files)} files to {out}; summary {files['summary']['bytes']} B; rebuild check {manifest['rebuild_check']['expected']}")
     return 0
 
