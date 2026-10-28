@@ -20,7 +20,10 @@ U.S. Customs and Border Protection". See `LICENSE-DATA.md`.
 
 ## How it runs
 
-`pipeline.yml` runs hourly at :17. Each run:
+`pipeline.yml` is scheduled at :17 and :47 every hour. GitHub drops many scheduled runs (on 2026-10-28 only 3
+of ~14 hourly runs fired), so the second line is there to get closer to one reading per hour. Runs are
+serialized (`concurrency: pipeline`), and snapshots are keyed by time, so two readings in an hour are fine.
+Each run:
 1. fetches both feeds, parses them into one normalized row per crossing × direction × lane group, and
    runs the per-run checks (`ingest/checks.py`). A failure writes nothing.
 2. writes `snapshots/source=<cbsa|cbp>/date=YYYY-MM-DD/<HHMMSS>.parquet` and the gzipped raw CBSA CSV to
