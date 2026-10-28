@@ -1,9 +1,11 @@
 name: pipeline
 
 on:
-  # schedule: hourly at :17 (UTC)
+  # schedule: twice an hour, :17 and :47 (UTC). GitHub drops many scheduled runs under load (3 of ~14
+  # expected fired on 2026-10-28), so the second line raises the odds of at least one reading per hour.
   schedule:
     - cron: "17 * * * *"
+    - cron: "47 * * * *"
   workflow_dispatch:
     inputs:
       fixtures:
