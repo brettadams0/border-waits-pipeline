@@ -8,7 +8,8 @@ pipeline deploys from `main`, so everything below is live.
 
 ### Added
 
-- Hourly ingest of the CBSA and CBP wait feeds into time-keyed Parquet snapshots on an orphan
+- Scheduled ingest of the CBSA and CBP wait feeds (cron at :17 past the hour in
+  `.github/workflows/pipeline.yml`) into time-keyed Parquet snapshots on an orphan
   `data` branch, with per-run checks in `ingest/checks.py` that write nothing when they fail.
 - The daily CBSA monthly-history update from open.canada.ca (`ingest/history.py`).
 - A dbt project on DuckDB: staging with time-zone resolution per side of each crossing, marts,

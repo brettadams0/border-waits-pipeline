@@ -7,7 +7,7 @@ is worth an issue even without a fix — use the **feed changed** template.
 
 ## Setup
 
-Python 3.13, which is what CI and the hourly pipeline run. No network is needed for the tests;
+Python 3.13, which is what CI and the scheduled pipeline run. No network is needed for the tests;
 everything runs on the files in `fixtures/`.
 
 ```sh
