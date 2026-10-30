@@ -38,6 +38,10 @@ pipeline deploys from `main`, so everything below is live.
   first entries are the two snapshots written by a fixtures test dispatch, whose `fetched_at` was
   the run time rather than a real fetch.
   <!-- FACT needed (W1): rows from the fixtures dispatch that reached the marts before the fix. -->
-- **The page shifted as data arrived.** `web/` now reserves space for the data-driven blocks
-  before they load.
-  <!-- FACT needed (W3): measured CLS before and after; the commit message records one pair. -->
+- **The page shifted as data arrived.** `web/index.html` rendered the featured-crossings table
+  empty and the live badge and notes hidden, then filled them in once the export loaded, pushing
+  everything below down. The table now ships with placeholder rows for the three Windsor–Detroit
+  crossings, and `web/styles.css` reserves height for the badge, notes, chart and pipeline panel.
+  Desktop CLS fell from 0.41 to 0.013 — lab measurement, headless Chrome 156 at 1280×800, 10 runs
+  per state, unthrottled. Mobile (390×844) measured 0.000 before and after, which says nothing
+  about slow connections, since those weren't tested.
