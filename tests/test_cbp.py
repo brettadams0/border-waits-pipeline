@@ -63,3 +63,11 @@ def test_noon_is_published_as_a_word():
     noon = [x for x in rows() if x["source_updated_raw"] and "Noon" in x["source_updated_raw"]]
     assert noon and all(x["source_updated_raw"].endswith(("Noon EDT", "Noon CDT", "Noon EST")) for x in noon)
     assert not [f for f in run_checks(noon) if "doesn't parse" in f]
+
+
+def test_midnight_is_published_as_a_word():
+    # Run 40829314499 failed its per-run checks on these two rows.
+    r = cbp.parse((FIX / "cbp-bwt-midnight.xml").read_bytes(), "1-1", "2026-10-29T06:28:00Z")
+    midnight = [x for x in r if x["source_updated_raw"] and "Midnight" in x["source_updated_raw"]]
+    assert [x["source_updated_raw"] for x in midnight] == ["10/29/2026 At Midnight MDT"] * 2
+    assert not [f for f in run_checks(r) if "doesn't parse" in f]

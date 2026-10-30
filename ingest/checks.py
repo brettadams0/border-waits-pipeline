@@ -5,8 +5,9 @@ MIN_CROSSINGS = 25
 MAX_DELAY = 720
 FORMATS = {
     "cbsa": re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2} [A-Z]{3}$"),
-    # 'At Noon EDT' instead of 'At 12:00 pm EDT' is in fixtures/cbp-bwt.xml (2026-10-27)
-    "cbp": re.compile(r"^\d{1,2}/\d{1,2}/\d{4} At (\d{1,2}:\d{2} [ap]m|Noon) [A-Z]{3}$"),
+    # 'At Noon EDT' instead of 'At 12:00 pm EDT' is in fixtures/cbp-bwt.xml (2026-10-27);
+    # 'At Midnight MDT' in fixtures/cbp-bwt-midnight.xml failed run 40829314499 (2026-10-29)
+    "cbp": re.compile(r"^\d{1,2}/\d{1,2}/\d{4} At (\d{1,2}:\d{2} [ap]m|Noon|Midnight) [A-Z]{3}$"),
 }
 
 
