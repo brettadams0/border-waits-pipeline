@@ -1,0 +1,7 @@
+# 2026-10-30T10:17:12.348Z  Chrome/156.0.8078.76  10 runs each, no CPU or network throttling
+desktop 1280x800 dpr1  before b6e9cfd (local) mean 0.4135  median 0.4135  min 0.4133  max 0.4135
+desktop 1280x800 dpr1  at b6e9cfd (local)     mean 0.0129  median 0.0129  min 0.0129  max 0.0129
+desktop 1280x800 dpr1  live                   mean 0.0128  median 0.0129  min 0.0127  max 0.0129
+mobile 390x844 dpr3    before b6e9cfd (local) mean 0.0000  median 0.0000  min 0.0000  max 0.0000
+mobile 390x844 dpr3    at b6e9cfd (local)     mean 0.0000  median 0.0000  min 0.0000  max 0.0000
+mobile 390x844 dpr3    live                   mean 0.0000  median 0.0000  min 0.0000  max 0.0000
