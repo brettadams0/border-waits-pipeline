@@ -1,0 +1,22 @@
+name: Bug
+description: The code, the page or the published export is wrong.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the command or URL, and the output or error.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: status
+    attributes:
+      label: status.json
+      description: For anything on the page, the run_id and result from /border-waits/data/v1/status.json at the time.

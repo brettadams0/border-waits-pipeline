@@ -1,0 +1,40 @@
+name: Feed changed
+description: CBSA or CBP published something the pipeline did not expect.
+title: "feed: "
+labels: [feed]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Most of this pipeline's rules exist because a feed did something once. A report with the
+        raw value is enough; a fix is not required.
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      options:
+        - CBSA (Canada-bound)
+        - CBP (US-bound)
+        - CBSA monthly history (open.canada.ca)
+    validations:
+      required: true
+  - type: input
+    id: run
+    attributes:
+      label: Run
+      description: Link to the pipeline run, or the run id from status.json. Leave empty if you saw it in the feed directly.
+  - type: textarea
+    id: raw
+    attributes:
+      label: The raw value
+      description: Exactly as published — the CSV row or XML element, including the time string and zone abbreviation.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What the pipeline did with it
+      description: Failed a test, warned, placed it on the wrong hour, dropped it, showed the wrong crossing.
+    validations:
+      required: true
