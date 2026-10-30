@@ -276,6 +276,9 @@ svg.chart { display: block; width: 100%; height: auto; }
 .chart .band { fill: var(--teal); opacity: 0.18; }
 .chart .median { fill: none; stroke: var(--teal); stroke-width: 2; }
 .chart .axis { stroke: var(--border); }
+.chart .solid { fill: var(--teal); }
+.chart .thin { fill: var(--surface); stroke: var(--teal); stroke-width: 1.5; }
+.chart .n { font-size: 9px; fill: var(--dim); }
 .chart text { fill: var(--muted); font: 11px var(--mono); }
 details { margin-top: 10px; }
 summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--soft); }

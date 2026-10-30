@@ -52,31 +52,46 @@ function renderChart({ summary }) {
   const sel = { crossing: $('pick-crossing').value, direction: $('pick-direction').value, lane: $('pick-lane').value };
   const rows = summary.by_hour.filter((r) => r.crossing_id === sel.crossing && r.direction === sel.direction && r.lane === sel.lane);
   const byHour = new Map(rows.map((r) => [r.local_hour, r]));
-  const W = 720, H = 240, L = 36, R = 8, T = 10, B = 26;
-  const max = Math.max(10, ...rows.filter((r) => r.n >= 7).map((r) => (r.n >= 20 ? r.p90_delay_min : r.median_delay_min)));
+  const W = 720, H = 240, L = 36, R = 20, T = 18, B = 26;
+  // Every hour that has a reading is drawn, with its count under it. Hours with
+  // fewer than SOLID readings are hollow rather than hidden: the page holds that
+  // data, and a blank chart claimed there was none. The line joins only adjacent
+  // hours that are both solid, so it never runs through a thin or empty hour.
+  const SOLID = 7, BAND = 20;
+  const max = Math.max(10, ...rows.map((r) => (r.n >= BAND ? r.p90_delay_min : r.median_delay_min)));
   const x = (h) => L + (h / 23) * (W - L - R), y = (v) => H - B - (v / max) * (H - T - B);
-  const med = [], band = [];
+  const runs = [], band = [];
+  let run = [];
   for (let h = 0; h < 24; h++) {
     const r = byHour.get(h);
-    if (r && r.n >= 7) med.push(`${x(h)},${y(r.median_delay_min)}`);
-    if (r && r.n >= 20) band.push([h, r]);
+    if (r && r.n >= SOLID) run.push(`${x(h)},${y(r.median_delay_min)}`);
+    else { if (run.length > 1) runs.push(run); run = []; }
+    if (r && r.n >= BAND) band.push([h, r]);
   }
+  if (run.length > 1) runs.push(run);
   const bandPath = band.length > 1 ? 'M' + band.map(([h, r]) => `${x(h)},${y(r.p90_delay_min)}`).join('L') +
     'L' + band.slice().reverse().map(([h, r]) => `${x(h)},${y(r.median_delay_min)}`).join('L') + 'Z' : '';
+  const points = rows.map((r) => {
+    const cx = x(r.local_hour), cy = y(r.median_delay_min);
+    return `<circle class="${r.n >= SOLID ? 'solid' : 'thin'}" cx="${cx}" cy="${cy}" r="3.5"/>` +
+      `<text class="n" x="${cx}" y="${cy - 8}" text-anchor="middle">${r.n}</text>`;
+  }).join('');
   const ticks = [0, 6, 12, 18, 23].map((h) => `<text x="${x(h)}" y="${H - 8}" text-anchor="middle">${h}:00</text>`).join('');
   const yt = [0, max / 2, max].map((v) => `<text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`).join('');
-  const enough = med.length > 0;
-  $('chart').innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Median wait by local hour${enough ? '' : ': not enough readings yet'}">
+  const thin = rows.filter((r) => r.n < SOLID).length;
+  $('chart').innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Median wait by local hour, ${rows.length} of 24 hours with readings, ${thin} of them from fewer than ${SOLID}">
     <line class="axis" x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}"/>${ticks}${yt}
     ${bandPath ? `<path class="band" d="${bandPath}"/>` : ''}
-    ${med.length > 1 ? `<polyline class="median" points="${med.join(' ')}"/>` : ''}
-    ${enough ? '' : `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">not enough readings yet</text>`}</svg>`;
+    ${runs.map((p) => `<polyline class="median" points="${p.join(' ')}"/>`).join('')}
+    ${points}
+    ${rows.length ? '' : `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">no readings yet</text>`}</svg>`;
   const days = Math.max(0, ...rows.map((r) => r.days));
-  $('chart-days').textContent = `Based on ${days} day${days === 1 ? '' : 's'} of readings. The median shows from 7 readings in an hour, the 90th-percentile band from 20.`;
+  $('chart-days').textContent = `Based on ${days} day${days === 1 ? '' : 's'} of readings. Each point is the median for that hour; the number above it is how many readings it rests on. Filled from ${SOLID} readings, hollow below that; the 90th-percentile band from ${BAND}.`;
   $('hour-table').tBodies[0].innerHTML = Array.from({ length: 24 }, (_, h) => {
     const r = byHour.get(h);
-    if (!r || r.n < 7) return `<tr><th scope="row">${h}:00</th><td colspan="2" class="none">not enough readings yet</td><td class="num">${r ? r.n : 0}</td><td class="num">${r ? r.days : 0}</td></tr>`;
-    return `<tr><th scope="row">${h}:00</th><td class="num">${r.median_delay_min}</td><td class="num">${r.n >= 20 ? r.p90_delay_min : '—'}</td><td class="num">${r.n}</td><td class="num">${r.days}</td></tr>`;
+    if (!r) return `<tr><th scope="row">${h}:00</th><td colspan="2" class="none">no readings yet</td><td class="num">0</td><td class="num">0</td></tr>`;
+    const med = r.n >= SOLID ? r.median_delay_min : `<span class="none">${r.median_delay_min} (thin)</span>`;
+    return `<tr><th scope="row">${h}:00</th><td class="num">${med}</td><td class="num">${r.n >= BAND ? r.p90_delay_min : '—'}</td><td class="num">${r.n}</td><td class="num">${r.days}</td></tr>`;
   }).join('');
 }
 
