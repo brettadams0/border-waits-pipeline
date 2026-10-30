@@ -23,6 +23,14 @@ pipeline deploys from `main`, so everything below is live.
   browser, a fallback snapshot for when the export cannot be fetched, and a Chromium test in CI.
 - A second schedule line at :47, because GitHub drops many scheduled runs.
 
+### Changed
+
+- **The by-hour chart shows thin hours instead of blanking.** `web/app.js` drew nothing for an hour
+  until it had 7 readings, so the chart said "not enough readings yet" while the page held readings
+  for 10 of 24 hours. Every hour with a reading is now a point with its count, filled from 7
+  readings and hollow below; the median line joins only adjacent filled hours, and the table marks
+  thin medians "(thin)".
+
 ### Fixed
 
 - **CBP's coming-hour stamps failed the run.** CBP stamps an update with the hour about to start,
@@ -45,4 +53,5 @@ pipeline deploys from `main`, so everything below is live.
   crossings, and `web/styles.css` reserves height for the badge, notes, chart and pipeline panel.
   Desktop CLS fell from 0.41 to 0.013 — lab measurement, headless Chrome 156 at 1280×800, 10 runs
   per state, unthrottled. Mobile (390×844) measured 0.000 before and after, which says nothing
-  about slow connections, since those weren't tested.
+  about slow connections, since those weren't tested. Reproduce with `node tools/measure_cls.mjs`;
+  the committed output is [`results/cls.txt`](results/cls.txt).

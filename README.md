@@ -16,7 +16,7 @@ scheduler fired 16 of the 93 scheduled slots it was given.
 Windsor–Detroit crossings, the last run's status, and a SQL console that re-runs one of the
 pipeline's own models in your browser and checks the answer against the build.
 
-<!-- HERO (W3): dashboard screenshot — dimensions, weight and alt text to come from W3. -->
+<img src="docs/dashboard-desktop.webp" width="720" height="360" alt="The border-waits dashboard on a desktop browser, dark theme. A heading 'border-waits', a one-line question about waits at the Windsor–Detroit crossings, a 'live' badge reading 'last run 4 h ago · 1,470 readings', and a table of the latest published estimate in minutes for the three crossings in each direction, for travellers and commercial lanes.">
 
 ## Does it stay correct when the schedule doesn't?
 
@@ -34,6 +34,21 @@ That measures GitHub's scheduler, not this pipeline and not the agencies: every 
 ran ingest, and the gaps are runs GitHub never started. So in practice this is a reading every few hours, not every hour, and anyone
 can check that in the Actions tab. The second cron line, at :47, was added to raise the odds of a
 run in any given hour; at this rate it doesn't make the schedule hourly.
+
+The export shows the same thing from the other side. It holds 18 runs between 2026-10-27 19:05 UTC
+and 2026-10-30 05:46 UTC, about 0.31 an hour; since the second cron line, 12 runs in 32.7 hours,
+about 0.37 an hour against the 2 an hour asked for; the longest stretch without a run is about 8
+hours. That is a different
+window from the table above, so the two don't add up and aren't meant to. The chart draws exactly
+what was stored, with a tick for every run and nothing invented between them:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/waits-dark.svg">
+  <img src="results/waits-light.svg" width="720" height="528" alt="Four small charts of published wait estimates in minutes at the Ambassador Bridge, Detroit–Windsor Tunnel and Gordie Howe Bridge, split by direction (to the US, to Canada) and lane (travellers, commercial), from October 27 to 30, 2026. Each reading is a coloured dot, and a strip of tick marks above each chart marks every pipeline run, with wide unmarked stretches where scheduled runs never happened. Lines join only readings from consecutive runs, so the gaps stay empty. Traveller waits sit at 0 almost throughout. Commercial waits toward the US at the Ambassador Bridge range from 0 to 35 minutes.">
+</picture>
+
+The raw rows behind it, with the export's data commit in the header, are in
+[`results/waits.csv`](results/waits.csv); `python tools/chart_waits.py` regenerates both.
 
 <!-- PENDING W1: the uptime FACT — data since / successful readings over the window. -->
 
@@ -108,7 +123,12 @@ name), a summary, the compiled SQL, `manifest.json` and `status.json`, and deplo
 docs. The previous run's data files are kept, so a SQL session that started before a deploy can
 finish. The page reads only the published export, with no build step, and falls back to a committed
 snapshot if the export can't be fetched. Its SQL console is DuckDB-WASM reading the Parquet
-directly. ([`export/__main__.py`](export/__main__.py), [`web/`](web))
+directly.
+
+The "typical wait by hour" chart shows thin data as thin rather than hiding it behind a threshold.
+Every hour with a reading is a point with its count printed above it — filled from 7 readings,
+hollow below that — and the median line joins only adjacent filled hours. The table shows a thin
+median as "N (thin)". The 90th-percentile band needs 20 readings. ([`app.js`](web/app.js)) ([`export/__main__.py`](export/__main__.py), [`web/`](web))
 
 ## Two agencies, one hour
 
