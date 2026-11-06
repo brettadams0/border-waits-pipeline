@@ -1,10 +1,10 @@
 {
  "schema_version": 1,
- "generated_at": "2026-11-06T20:53:58Z",
- "run_id": "42292123496-1",
- "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/42292123496",
+ "generated_at": "2026-11-06T21:04:08Z",
+ "run_id": "42293532136-1",
+ "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/42293532136",
  "git_sha": "8c41d95ef255b774dbb685d9389ff77821d308ea",
- "data_sha": "655dc8b78c36e0ec09b2f2d91b69e8710f6c14fa",
+ "data_sha": "d5405524e6e67ca7a2ad747b3c31ad875b862c4b",
  "collecting_since": "2026-10-27 19:05:08+00:00",
  "duckdb_version": "1.4.3",
  "dbt_version": "1.12.6",
@@ -16,28 +16,28 @@
    "bytes": 4278
   },
   "fct_wait_readings": {
-   "url": "fct_wait_readings.e9f7f38e.parquet",
-   "sha256": "e9f7f38eede176354016e58f3224fb83d48f3c65c180a3763e82b783c250db46",
-   "rows": 5152,
-   "bytes": 60406
+   "url": "fct_wait_readings.f847d250.parquet",
+   "sha256": "f847d250f6dc05c670c88bcacbcee2b191474dfa819c6fef9a26f3f19523da0e",
+   "rows": 5154,
+   "bytes": 60448
   },
   "fct_wait_readings_recent": {
-   "url": "fct_wait_readings_recent.01b1f113.parquet",
-   "sha256": "01b1f11392478b9e116c3ead1f7de47e70e714c8543811e7f6cc3f488473931c",
-   "rows": 5150,
-   "bytes": 60296
+   "url": "fct_wait_readings_recent.8d044cff.parquet",
+   "sha256": "8d044cff2bd9b7a00e13dda807cfcbf88d264d97c43d2d7b1611120427f4e302",
+   "rows": 5152,
+   "bytes": 60395
   },
   "agg_wait_by_hour": {
-   "url": "agg_wait_by_hour.dd04beb1.parquet",
-   "sha256": "dd04beb1cb83068e636d185623de8ad3fe146f7ca9e1fefbe75781952d079e81",
+   "url": "agg_wait_by_hour.f82952da.parquet",
+   "sha256": "f82952da20ab31caad94698ff23dc1c14e559d5b18f69d8c95c4c7e519779186",
    "rows": 1969,
-   "bytes": 6358
+   "bytes": 6359
   },
   "agg_wait_by_weekday_hour": {
-   "url": "agg_wait_by_weekday_hour.c7d04424.parquet",
-   "sha256": "c7d044246dda5cdc7c4285ddfa314f71890a4aab446b3731fd7f1aa205932833",
-   "rows": 4769,
-   "bytes": 9707
+   "url": "agg_wait_by_weekday_hour.d47cdd1e.parquet",
+   "sha256": "d47cdd1e6939eafe8df325b69351e80a320761d706fe2d0d9d003b198d8604be",
+   "rows": 4771,
+   "bytes": 9706
   },
   "fct_service_standard_monthly": {
    "url": "fct_service_standard_monthly.fbda04b3.parquet",
@@ -70,10 +70,10 @@
    "bytes": 860
   },
   "summary": {
-   "url": "summary.42292123496-1.json",
-   "sha256": "9494995cb1e378dc9f840dd4e4c0576ec027b7ce17e8993278d86258b1aad289",
+   "url": "summary.42293532136-1.json",
+   "sha256": "81214a210cbd02e7d978dba7fc645f02d8cb1f63fec8365349a7a5ac6f5c4092",
    "rows": null,
-   "bytes": 52877
+   "bytes": 52118
   }
  },
  "sources": {
@@ -82,9 +82,9 @@
    "licence": "Open Government Licence \u2013 Canada",
    "licence_url": "https://open.canada.ca/en/open-government-licence-canada",
    "attribution": "Contains information licensed under the Open Government Licence \u2013 Canada.",
-   "last_fetched_at": "2026-11-06 20:53:43+00:00",
+   "last_fetched_at": "2026-11-06 21:03:55+00:00",
    "newest_source_updated_at": "2026-11-06 21:40:00+00:00",
-   "lag_minutes": -46,
+   "lag_minutes": -36,
    "freshness": "pass"
   },
   "cbp": {
@@ -110,26 +110,26 @@
   "error": 0,
   "skip": 0,
   "warnings": [
-   "warn_source_updated_ahead: 18 rows",
+   "warn_source_updated_ahead: 14 rows",
    "warn_tz_abbrev_matches_zone: 1 rows",
    "warn_unknown_status_raw: 1 rows",
    "warn_history_metadata_age: 1 rows"
   ]
  },
  "cost": {
-  "run_seconds": 15.0,
+  "run_seconds": 13.0,
   "snapshot_bytes_added": 10894,
-  "data_branch_bytes": 8407668
+  "data_branch_bytes": 8608207
  },
  "rebuild_check": {
   "model": "agg_wait_by_hour",
   "sql": "sql/agg_wait_by_hour.7da91f49.sql",
-  "input": "fct_wait_readings_recent.01b1f113.parquet",
+  "input": "fct_wait_readings_recent.8d044cff.parquet",
   "check_sql": "with t as (\n{sql}\n) select count(*) as n, sum(t.n) as sum, md5(string_agg(t::varchar, '|' order by t::varchar)) as md5 from t",
   "expected": {
    "n": 1969,
-   "sum": 5018,
-   "md5": "67354c59217057fc298b7d0bb7e5bf99"
+   "sum": 5020,
+   "md5": "3516c93a28fe47985ab5c37789672480"
   }
  }
 }
