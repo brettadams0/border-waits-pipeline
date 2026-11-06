@@ -1,10 +1,10 @@
 {
  "schema_version": 1,
- "generated_at": "2026-11-06T00:14:46Z",
- "run_id": "42135319962-1",
- "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/42135319962",
+ "generated_at": "2026-11-06T15:02:05Z",
+ "run_id": "42239163676-1",
+ "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/42239163676",
  "git_sha": "8c41d95ef255b774dbb685d9389ff77821d308ea",
- "data_sha": "53a61c0404f09bf26d267ec51d10de9a18d80e58",
+ "data_sha": "f8e951e842c27b0fbdd242cdb9c1657bb12c7dff",
  "collecting_since": "2026-10-27 19:05:08+00:00",
  "duckdb_version": "1.4.3",
  "dbt_version": "1.12.6",
@@ -16,28 +16,28 @@
    "bytes": 4278
   },
   "fct_wait_readings": {
-   "url": "fct_wait_readings.2c6389f0.parquet",
-   "sha256": "2c6389f018fb0631b1d3914bc8339bda3ffafd9fe3c69db07e22eccc7071f989",
-   "rows": 4919,
-   "bytes": 58001
+   "url": "fct_wait_readings.84b45dd7.parquet",
+   "sha256": "84b45dd79fd4f275430e1177aa3c135a747fc719dfb645d21e91aaf022ea2323",
+   "rows": 5023,
+   "bytes": 59360
   },
   "fct_wait_readings_recent": {
-   "url": "fct_wait_readings_recent.f19a56fc.parquet",
-   "sha256": "f19a56fc80e2c26d3268737ee07bd50b4fec4b1c70605ccd46b795b03cf71267",
-   "rows": 4917,
-   "bytes": 57912
+   "url": "fct_wait_readings_recent.d82f7725.parquet",
+   "sha256": "d82f77256ca6ba08c246db1c2b6de50cd102d56b76944644063d5f219ad64394",
+   "rows": 5021,
+   "bytes": 59289
   },
   "agg_wait_by_hour": {
-   "url": "agg_wait_by_hour.39206560.parquet",
-   "sha256": "39206560af246636b875a8e444c7ffddb24aa5825c351100ad07a43f944a44ff",
-   "rows": 1953,
-   "bytes": 6259
+   "url": "agg_wait_by_hour.e8a03737.parquet",
+   "sha256": "e8a03737a2ffd070a0aa90d74a26f268be572df899a25a6fab14338f546ba47f",
+   "rows": 1966,
+   "bytes": 6276
   },
   "agg_wait_by_weekday_hour": {
-   "url": "agg_wait_by_weekday_hour.406135bc.parquet",
-   "sha256": "406135bc99102bc488b1762abed54ec103c088dc45f070bb8f8226516afcdfa8",
-   "rows": 4550,
-   "bytes": 9477
+   "url": "agg_wait_by_weekday_hour.16939eba.parquet",
+   "sha256": "16939ebac10eb78d0057b0ab0e045b12ed1cb837c4a96812f36a7f4eb3451b41",
+   "rows": 4648,
+   "bytes": 9407
   },
   "fct_service_standard_monthly": {
    "url": "fct_service_standard_monthly.fbda04b3.parquet",
@@ -70,10 +70,10 @@
    "bytes": 860
   },
   "summary": {
-   "url": "summary.42135319962-1.json",
-   "sha256": "b8634cbfd90c1d87b04e7acc3b6047708210ceafdf525a7e61cb42062bc2ad72",
+   "url": "summary.42239163676-1.json",
+   "sha256": "996389a8bb75e4788431f5dee4fdd613426d7a125a05fab065dac10a98f09c44",
    "rows": null,
-   "bytes": 53752
+   "bytes": 52063
   }
  },
  "sources": {
@@ -82,9 +82,9 @@
    "licence": "Open Government Licence \u2013 Canada",
    "licence_url": "https://open.canada.ca/en/open-government-licence-canada",
    "attribution": "Contains information licensed under the Open Government Licence \u2013 Canada.",
-   "last_fetched_at": "2026-11-06 00:14:30+00:00",
-   "newest_source_updated_at": "2026-11-06 01:00:00+00:00",
-   "lag_minutes": -46,
+   "last_fetched_at": "2026-11-06 15:01:53+00:00",
+   "newest_source_updated_at": "2026-11-06 15:40:00+00:00",
+   "lag_minutes": -38,
    "freshness": "pass"
   },
   "cbp": {
@@ -92,9 +92,9 @@
    "licence": "Public domain (U.S. government work)",
    "licence_url": "https://www.cbp.gov/site-policy-notices/copyright",
    "attribution": "Source: U.S. Customs and Border Protection",
-   "last_fetched_at": "2026-11-06 00:14:30+00:00",
-   "newest_source_updated_at": "2026-11-06 02:00:00+00:00",
-   "lag_minutes": -106,
+   "last_fetched_at": "2026-11-06 15:01:53+00:00",
+   "newest_source_updated_at": "2026-11-07 04:00:00+00:00",
+   "lag_minutes": -778,
    "freshness": "pass"
   },
   "cbsa_history": {
@@ -110,26 +110,26 @@
   "error": 0,
   "skip": 0,
   "warnings": [
-   "warn_source_updated_ahead: 14 rows",
+   "warn_source_updated_ahead: 8 rows",
    "warn_tz_abbrev_matches_zone: 1 rows",
    "warn_unknown_status_raw: 1 rows",
    "warn_history_metadata_age: 1 rows"
   ]
  },
  "cost": {
-  "run_seconds": 16.0,
-  "snapshot_bytes_added": 10855,
-  "data_branch_bytes": 7815255
+  "run_seconds": 11.0,
+  "snapshot_bytes_added": 10797,
+  "data_branch_bytes": 8011454
  },
  "rebuild_check": {
   "model": "agg_wait_by_hour",
   "sql": "sql/agg_wait_by_hour.7da91f49.sql",
-  "input": "fct_wait_readings_recent.f19a56fc.parquet",
+  "input": "fct_wait_readings_recent.d82f7725.parquet",
   "check_sql": "with t as (\n{sql}\n) select count(*) as n, sum(t.n) as sum, md5(string_agg(t::varchar, '|' order by t::varchar)) as md5 from t",
   "expected": {
-   "n": 1953,
-   "sum": 4793,
-   "md5": "54f886c3b1af21f85b996b5996c689fc"
+   "n": 1966,
+   "sum": 4894,
+   "md5": "6540698c8afc33148aaed472b8fda0bc"
   }
  }
 }
