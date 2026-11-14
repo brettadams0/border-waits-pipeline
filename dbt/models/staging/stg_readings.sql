@@ -1,5 +1,6 @@
 -- Casts the stored rows, keeps the standard lane groups, and resolves each
--- source's published local time to an instant in that side's zone.
+-- source's published local time to an instant in that side's zone. Every stored
+-- row stays here; quality_issue says why a row is left out of the marts.
 with raw as (
     select * from {{ source('raw', 'readings') }}
     -- excluded_snapshots.path is the path on the data branch (snapshots/...); filename carries the datastore prefix
@@ -14,8 +15,8 @@ zoned as (
         r.*,
         case r.source when 'cbsa' then c.cbsa_iana_zone else c.cbp_iana_zone end as iana_zone,
         case r.source
-            when 'cbsa' then strptime(substr(r.source_updated_raw, 1, 16), '%Y-%m-%d %H:%M')
-            else strptime(
+            when 'cbsa' then try_strptime(substr(r.source_updated_raw, 1, 16), '%Y-%m-%d %H:%M')
+            else try_strptime(
                 regexp_replace(replace(r.source_updated_raw, ' At Noon ', ' At 12:00 pm '), ' [A-Z]{3}$', ''),
                 '%m/%d/%Y At %I:%M %p')
         end as local_raw
@@ -96,7 +97,8 @@ select
     lane_type,
     status_raw,
     delay_min,
-    is_open,
+    -- 'Temporarily closed' (CBSA, seen 2026-10-28) was stored before the parser knew it
+    coalesce(is_open, case when status_raw ilike '%closed%' then false end) as is_open,
     lanes_open,
     source_updated_raw,
     source_tz_abbrev,
@@ -124,5 +126,14 @@ select
         {{ tz_offset('iana_zone', 'source_updated_at') }} > least(
             {{ tz_offset('iana_zone', "timezone('UTC', make_timestamp(year(source_updated_at), 1, 15, 12, 0, 0))") }},
             {{ tz_offset('iana_zone', "timezone('UTC', make_timestamp(year(source_updated_at), 7, 15, 12, 0, 0))") }}))
-    end as tz_abbrev_matches_zone
+    end as tz_abbrev_matches_zone,
+    -- Why a stored row is not eligible for the marts (null: eligible). The row itself is never
+    -- changed or dropped here. A delay of 241 to 720 minutes is unusual but kept (it only warns).
+    case
+        when direction is null or lane is null
+             or direction not in ('to_canada', 'to_us') or lane not in ('travellers', 'commercial') then 'invalid_category'
+        when delay_min < 0 or delay_min > 720 then 'delay_out_of_range'
+        when source_updated_raw is not null and local_updated is null then 'unparsed_update_time'
+        when source_updated_at > fetched_at + interval 24 hour then 'update_far_ahead'
+    end as quality_issue
 from final

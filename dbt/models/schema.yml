@@ -4,9 +4,11 @@ x-run: &run {where: "{% if var('run_id') %}run_id = '{{ var('run_id') }}'{% else
 
 models:
   - name: stg_readings
-    description: Stored runs, standard lane groups, with each source's local time resolved to an instant.
+    description: >-
+      Stored runs, standard lane groups, with each source's local time resolved to an instant.
+      Every stored row is here; quality_issue says why a row is left out of the marts.
     data_tests:
-      # Freshness: how far each source's newest update is behind the run's fetch.
+      # Freshness: the median age of a source's updates when this run fetched them (source_lag.sql).
       # Thresholds estimated; never blocks a deploy (run with --select tag:freshness).
       - source_lag: {name: freshness_warn_cbsa, arguments: {source_value: cbsa, max_minutes: 120}, config: {severity: warn, tags: [freshness]}}
       - source_lag: {name: freshness_error_cbsa, arguments: {source_value: cbsa, max_minutes: 360}, config: {tags: [freshness]}}
@@ -15,6 +17,19 @@ models:
       - min_distinct_per_run: {arguments: {column_name: source_crossing_name, source_value: cbsa, minimum: 25}}
       - min_distinct_per_run: {arguments: {column_name: cbp_port_number, source_value: cbp, minimum: 25}}
     columns:
+      - name: schema_version
+        description: The ingest row contract (ingest/schema.py). A run that writes another version must not build silently.
+        data_tests:
+          - accepted_values: {arguments: {values: [1], quote: false}, config: *run}
+          - accepted_values: {name: warn_history_schema_version, arguments: {values: [1], quote: false}, config: {severity: warn}}
+      - name: quality_issue
+        description: >-
+          Null when the row is eligible for the marts. Otherwise why it is left out: invalid_category
+          (direction or lane outside the contract), delay_out_of_range (outside 0-720 minutes),
+          unparsed_update_time (the published update time does not parse), update_far_ahead (stamped
+          more than a day after its fetch). reading_quality counts these.
+        data_tests:
+          - accepted_values: {arguments: {values: [invalid_category, delay_out_of_range, unparsed_update_time, update_far_ahead]}}
       - name: source
         data_tests:
           - not_null: {config: *run}
@@ -49,6 +64,32 @@ models:
       - name: crossing_id
         data_tests:
           - relationships: {arguments: {to: ref('dim_crossing'), field: crossing_id}, config: *run}
+
+  - name: fct_wait_readings
+    description: >-
+      One row per crossing, direction, lane and reading time, from eligible rows only. Repeated fetches
+      of one source update are one row (first and last fetch kept, values from the last). Lanes CBP
+      publishes without an update time are timed by their fetch (time_basis = fetch).
+    columns:
+      - name: reading_at
+        data_tests:
+          - not_null
+      - name: time_basis
+        data_tests:
+          - accepted_values: {arguments: {values: [source, fetch]}}
+
+  - name: latest_readings
+    description: The whole row each crossing, direction and lane had in the newest poll that included it.
+    columns:
+      - name: observed_at
+        data_tests:
+          - not_null
+
+  - name: reading_quality
+    description: Stored rows the marts leave out, counted by source and reason.
+
+  - name: pipeline_runs
+    description: One row per stored run with the minutes since the previous one (the cadence actually achieved).
 
   - name: unmatched_crossings
     description: Names that need a dim_crossing row. The pipeline keeps running; this warns.

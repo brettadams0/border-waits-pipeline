@@ -6,6 +6,9 @@ config-version: 2
 vars:
   run_id: ""
   datastore: "../datastore"
+  # The by-hour chart and the rebuild check use this many days. Four of each weekday, and enough for
+  # an hourly source to reach the chart's day gates (export/__main__.py CHART).
+  recent_days: 28
 
 seeds:
   border_waits:
