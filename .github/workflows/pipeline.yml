@@ -1,8 +1,9 @@
 name: pipeline
 
 on:
-  # schedule: twice an hour, :17 and :47 (UTC). GitHub drops many scheduled runs under load (3 of ~14
-  # expected fired on 2026-10-28), so the second line raises the odds of at least one reading per hour.
+  # schedule: twice an hour, :17 and :47 (UTC). GitHub runs scheduled workflows best-effort and drops many
+  # under load: the median gap between runs was about 3 h in the first weeks (the manifest's `cadence`
+  # reports it). The second line raises the odds of a reading in a given hour; it does not guarantee one.
   schedule:
     - cron: "17 * * * *"
     - cron: "47 * * * *"
@@ -19,31 +20,29 @@ on:
 
 concurrency: pipeline
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-  issues: write
+# Nothing by default; each job asks for what it uses.
+permissions: {}
 
 env:
   RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
+# Actions are pinned to the commit their version tag pointed at on 2026-11-14.
 jobs:
   run:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
+    permissions:
+      contents: write   # pushes the run to the data branch
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: data
           path: datastore
           fetch-depth: 1
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.13"
           cache: pip
@@ -56,16 +55,22 @@ jobs:
           if [ "${{ inputs.fail_ingest }}" = "true" ]; then echo "forced failure"; exit 1; fi
           before=$(du -sb datastore --exclude=.git | cut -f1)
           python -m ingest --run-id "$RUN_ID" ${{ inputs.fixtures && '--fixtures' || '' }}
-          # the CBSA history: once a day
-          if [ "$(date -u +%H)" = "06" ] || [ ! -d datastore/history/cbsa_land ]; then python -m ingest.history; fi
+          # The CBSA history, about once a day by the time since the last check. It reports a failed
+          # check and carries on: the feeds above are already collected.
+          python -m ingest.history
           echo "SNAPSHOT_BYTES=$(( $(du -sb datastore --exclude=.git | cut -f1) - before ))" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: raw-${{ env.RUN_ID }}
           path: raw-artifact
           retention-days: 14
+
+      # The readings are stored before anything downstream can fail. If dbt or the export breaks, this run's
+      # snapshots are already on the data branch and published/ still holds the last good export.
+      - name: Store the run's snapshots
+        run: scripts/commit-data.sh ingest snapshots raw history
 
       - name: dbt build
         working-directory: dbt
@@ -86,60 +91,90 @@ jobs:
           (cd dbt && dbt docs generate --static --profiles-dir . --vars "{datastore: ../datastore}")
           mkdir -p public/docs && cp dbt/target/static_index.html public/docs/index.html
 
-      - name: Commit the run to the data branch
+      - name: Store the published export
         run: |
           rm -rf datastore/published && mkdir -p datastore/published && cp -r public/data datastore/published/
-          cd datastore
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -q -m "run $RUN_ID"
-          git push -q origin HEAD:data
+          scripts/commit-data.sh publish published
 
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: public
 
-      - uses: actions/deploy-pages@v5
+  deploy:
+    needs: run
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
 
+  # Housekeeping after a good deploy. Nothing depends on it: if closing the issue fails, the data that was
+  # just published is not reported as a failed run.
+  recovered:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
       - name: Close the failure issue
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for n in $(gh issue list --state open --label pipeline-failing --json number --jq '.[].number'); do
-            gh issue close "$n" --comment "Recovered in $RUN_URL"
+          for n in $(gh issue list --repo ${{ github.repository }} --state open --label pipeline-failing --json number --jq '.[].number'); do
+            gh issue close "$n" --repo ${{ github.repository }} --comment "Recovered in $RUN_URL"
           done
 
   on-failure:
-    needs: run
-    if: failure()
+    needs: [run, deploy]
+    if: ${{ always() && (needs.run.result == 'failure' || needs.deploy.result == 'failure') }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read     # reads which step failed
+      pages: write
+      id-token: write
+      issues: write
     environment:
       name: github-pages
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: data
           path: datastore
           fetch-depth: 1
 
-      - name: Last good export with an honest status.json
-        run: |
-          mkdir -p public && cp -r datastore/published/data public/
-          step=$(gh run view ${{ github.run_id }} --repo ${{ github.repository }} --json jobs \
-            --jq '[.jobs[] | select(.name == "run") | .steps[] | select(.conclusion == "failure") | .name][0] // "unknown"')
-          printf '{"run_id": "%s", "time": "%s", "result": "failure", "failed_step": "%s", "run_url": "%s",\n "last_success": %s}\n' \
-            "$RUN_ID" "$(date -u +%FT%TZ)" "$step" "$RUN_URL" "$(cat datastore/published/data/v1/status.json)" \
-            > public/data/v1/status.json
-          echo "STEP=$step" >> "$GITHUB_ENV"
+      # Pages replaces the whole site on a deploy, so the recovery site carries the last good data
+      # (published/ on the data branch) AND the dbt docs, which are fetched from the site that is live now.
+      # With neither (no run has succeeded yet), export.recover publishes a status.json that says so.
+      - name: Last good site with an honest status.json
         env:
           GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run view ${{ github.run_id }} --repo ${{ github.repository }} --json jobs > jobs.json
+          step=$(jq -r '[.jobs[] | select(.name == "run" or .name == "deploy") | (.steps // [])[] | select(.conclusion == "failure") | .name][0] // "unknown"' jobs.json)
+          if [ "${{ needs.deploy.result }}" = "failure" ]; then step=deploy; fi
+          # were this run's readings stored before it failed?
+          collected=$(jq -r '[.jobs[] | select(.name == "run") | (.steps // [])[] | select(.name == "Store the run'"'"'s snapshots" and .conclusion == "success")] | length > 0' jobs.json)
+          curl -fsSL --max-time 60 -o last-good-docs.html \
+            "https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/docs/" || rm -f last-good-docs.html
+          python3 -m export.recover --published datastore/published --out public --run-id "$RUN_ID" \
+            --failed-step "$step" --collected "$collected" --run-url "$RUN_URL" --docs last-good-docs.html
+          echo "STEP=$step" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-pages-artifact@v5
+      # Its own artifact name: when the deploy job is what failed, this run already holds a 'github-pages' artifact.
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
+          name: github-pages-recovery
           path: public
 
-      - uses: actions/deploy-pages@v5
+      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+        with:
+          artifact_name: github-pages-recovery
 
       - name: Open or update the failure issue
         env:
