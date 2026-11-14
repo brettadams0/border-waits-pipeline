@@ -38,7 +38,7 @@ def parse_status(raw):
     m = MINUTES_RE.match(raw)
     if m:
         return int(m.group(1)), True
-    if raw == "Closed":
+    if raw in ("Closed", "Temporarily closed"):  # the second seen live on 2026-10-28 (Abbotsford-Huntingdon)
         return None, False
     return None, None  # 'Not Applicable' and anything unknown: no reading, openness unknown
 
@@ -57,6 +57,8 @@ def parse(body, run_id, fetched_at):
         if len(cells) != len(HEADER):
             raise ContractError(f"cbsa: {len(cells)} cells in {line!r}")
         office, location, updated = cells[0], cells[1], cells[2]
+        if not office:
+            raise ContractError(f"cbsa: no customs office in {line!r}")
         m = UPDATED_RE.match(updated)
         for lane, raw in (("commercial", cells[3]), ("travellers", cells[5])):
             delay, is_open = parse_status(raw)
