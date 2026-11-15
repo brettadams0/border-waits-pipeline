@@ -45,6 +45,39 @@ def test_bad_old_snapshot_still_builds(tmp_path):
     assert rc == 0 and status.get("error", 0) == 0 and status.get("fail", 0) == 0, status
     warned = {r["unique_id"].split(".")[2] for r in results if r["status"] == "warn"}
     assert "warn_history_delay_0_720" in warned, warned
+    # D06: the bad value is still inspectable in staging, with its reason, and is counted...
+    import duckdb
+    con = duckdb.connect(str(tmp_path / "bwt.duckdb"), read_only=True)
+    assert con.execute("select delay_min, quality_issue from stg_readings where delay_min > 720").fetchall() == [(900, "delay_out_of_range")]
+    assert con.execute("select source, quality_issue, stored_rows, runs from reading_quality").fetchall() == [("cbsa", "delay_out_of_range", 1, 1)]
+    # ...but it is in no table the page or the console reads, so it cannot bias a median
+    assert con.execute("select max(delay_min) from fct_wait_readings").fetchone()[0] <= 720
+    assert con.execute("select max(p90_delay_min) from agg_wait_by_hour").fetchone()[0] <= 720
+    assert con.execute("select count(*) from latest_readings where delay_min > 720").fetchone()[0] == 0
+    # the rest of that old snapshot is unaffected
+    assert con.execute("select count(*) from fct_wait_readings where run_id = '100-1'").fetchone()[0] > 30
+
+
+def test_malformed_old_timestamp_and_legacy_columns_do_not_halt_the_build(tmp_path):
+    """D06: strptime used to raise on one unparseable historical update time, failing the model before
+    any warn-only test could run. And a snapshot written before a column existed must still load."""
+    import duckdb
+    datastore(tmp_path)
+    old = cbsa.parse((ROOT / "fixtures" / "cbsa-bwt-eng.csv").read_bytes(), "100-1", "2026-10-26T17:17:00Z")
+    old[0]["source_updated_raw"] = "2026-13-45 99:99 EDT"      # never passes today's ingest checks; history can hold it
+    path = run_paths(tmp_path / "ds", "cbsa", "2026-10-26T17:17:00Z")[0]
+    write_parquet(old, path)
+    # rewrite that snapshot as an older schema would have: no lanes_open or port_status columns
+    duckdb.sql(f"copy (select * exclude (lanes_open, port_status) from read_parquet('{path}')) to '{path}.tmp' (format parquet)")
+    Path(f"{path}.tmp").replace(path)
+    assert cli.main(["--run-id", "101-1", "--fixtures", "--datastore", str(tmp_path / "ds"),
+                     "--raw-dir", str(tmp_path / "raw"), "--fetched-at", "2026-10-27T17:26:20Z"]) == 0
+    rc, status, results = build(tmp_path, "101-1")
+    assert rc == 0 and status.get("error", 0) == 0 and status.get("fail", 0) == 0, status
+    con = duckdb.connect(str(tmp_path / "bwt.duckdb"), read_only=True)
+    assert con.execute("select quality_issue, count(*) from stg_readings where run_id = '100-1' and quality_issue is not null group by all").fetchall() == [("unparsed_update_time", 1)]
+    assert con.execute("select count(*), count(lanes_open) from stg_readings where run_id = '100-1'").fetchone() == (len(old), 0)
+    assert con.execute("select count(*) from fct_wait_readings where run_id = '100-1'").fetchone()[0] == len(old) - 1
 
 
 def test_bad_current_run_fails(tmp_path):
@@ -72,7 +105,7 @@ def test_export_after_good_build(tmp_path):
         body = (out / f["url"]).read_bytes()
         assert hashlib.sha256(body).hexdigest() == f["sha256"], name
         assert f["sha256"][:8] in f["url"] or name == "summary", name
-    assert m["files"]["summary"]["bytes"] <= 30_000
+    assert m["files"]["summary"]["bytes"] <= 30_000   # one run; tests/test_export.py checks a month of data
     assert m["tests"]["error"] == 0
     assert m["rebuild_check"]["expected"] == export.rebuild_check(
         (out / m["files"]["sql/agg_wait_by_hour"]["url"]).read_text(), out / m["files"]["fct_wait_readings_recent"]["url"])

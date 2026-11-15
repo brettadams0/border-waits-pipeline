@@ -55,6 +55,8 @@ def parse(body, run_id, fetched_at):
     for port in root.findall("port"):
         if text(port, "border") != "Canadian Border":
             continue
+        if not text(port, "port_number"):
+            raise ContractError(f"cbp: a Canadian-border port has no port_number ({text(port, 'port_name')!r})")
         date = text(port, "date")
         for group_tag, lane in LANES.items():
             group = port.find(group_tag)

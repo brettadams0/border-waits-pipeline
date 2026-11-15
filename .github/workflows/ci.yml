@@ -8,39 +8,76 @@ on:
 permissions:
   contents: read
 
+# Actions are pinned to the commit their version tag pointed at on 2026-11-14.
 jobs:
   test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.13"
           cache: pip
 
       - run: pip install -r requirements.txt
 
-      # No network: parsers, contracts, per-run checks, dbt build on fixture-built
-      # snapshots (unit tests included), the bad-old-snapshot case and the export.
+      # No network: parsers, contracts, per-run checks, retries, dbt on fixture-built snapshots (unit
+      # tests included), old-defect cases, the export on a month of replayed runs, retention, the
+      # recovery site, and the data-branch commit order against a local bare repository.
       - name: pytest
         run: python -m pytest -q
 
-      # The page against a fixture export (no network: the SQL load is checked locally with --sql).
-      - name: Export from fixtures
+      # The page against a month of replayed fixture runs (tests/fixture_store.py), exported as the
+      # pipeline would: hours with too few days, closed lanes and dropped runs are all in it.
+      - name: Export from a month of fixture runs
         run: |
-          mkdir -p datastore/history/cbsa_land
-          cp fixtures/cbsa-history.csv "datastore/history/cbsa_land/2025-12-18T22:31:02.377918.csv"
-          python -m ingest --run-id ci-1 --fixtures
-          (cd dbt && dbt build --profiles-dir . --vars "{run_id: ci-1, datastore: ../datastore}" --exclude tag:freshness)
-          python -m export --run-id ci-1
+          python -m tests.fixture_store --datastore datastore
+          (cd dbt && dbt build --profiles-dir . --vars "{run_id: fx-2026111418, datastore: ../datastore}" --exclude tag:freshness)
+          python -m export --run-id fx-2026111418 --generated-at 2026-11-14T18:30:00Z
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: 22.x
 
-      - name: Page tests
+      - name: Install Playwright and Chromium
         run: |
           npm install -g playwright@1.56.1
           playwright install --with-deps chromium
-          NODE_PATH="$(npm root -g)" node web/test/page.mjs public/data/v1
+
+      # Offline and deterministic: states, freshness, the chart and the saved snapshot. Faults are
+      # injected by intercepting the page's own requests; the clock is the test's.
+      - name: Page tests
+        run: NODE_PATH="$(npm root -g)" node web/test/page.mjs public/data/v1
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: fixture-export
+          path: public/data/v1
+          retention-days: 3
+
+  # The SQL console with the real DuckDB-Wasm. It downloads the engine from cdn.jsdelivr.net and its
+  # extensions from extensions.duckdb.org, so a failure here can be theirs: it is its own job, and the
+  # offline job above never depends on it.
+  sql-console:
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: fixture-export
+          path: public/data/v1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22.x
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm install -g playwright@1.56.1
+          playwright install --with-deps chromium
+
+      - name: SQL console tests (network)
+        run: NODE_PATH="$(npm root -g)" node web/test/sql.mjs public/data/v1

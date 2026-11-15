@@ -62,7 +62,73 @@ unit_tests:
           - {run_id: b, crossing_id: ambassador_bridge, direction: to_us, lane: travellers, source_updated_at: "2026-10-27 17:00:00+00", fetched_at: "2026-10-27 17:17:00+00", delay_min: 10}
     expect:
       rows:
-        - {run_id: b, fetched_at: "2026-10-27 17:17:00+00"}
+        - {run_id: b, fetched_at: "2026-10-27 17:17:00+00", last_fetched_at: "2026-10-27 18:17:00+00", observations: 2, revised: false, delay_min: 10, time_basis: source}
+
+  # D04: the correction policy. A value that changes under an unchanged source time keeps the later value and is flagged.
+  # D05: readings without a source time (CBP closed/pending lanes) are kept, one per poll, timed by the fetch.
+  # D06: a row with a quality issue stays out.
+  - name: fct_wait_readings_corrections_untimed_and_quality
+    model: fct_wait_readings
+    given:
+      - input: ref('int_readings_matched')
+        rows:
+          - {run_id: a, crossing_id: ambassador_bridge, direction: to_us, lane: commercial, source_updated_at: "2026-10-27 17:00:00+00", fetched_at: "2026-10-27 17:17:00+00", status_raw: no delay, delay_min: 0, is_open: true}
+          - {run_id: b, crossing_id: ambassador_bridge, direction: to_us, lane: commercial, source_updated_at: "2026-10-27 17:00:00+00", fetched_at: "2026-10-27 18:17:00+00", status_raw: delay, delay_min: 40, is_open: true}
+          - {run_id: a, crossing_id: detroit_windsor_tunnel, direction: to_us, lane: commercial, source_updated_at: null, fetched_at: "2026-10-27 17:17:00+00", status_raw: Lanes Closed, delay_min: null, is_open: false}
+          - {run_id: b, crossing_id: detroit_windsor_tunnel, direction: to_us, lane: commercial, source_updated_at: null, fetched_at: "2026-10-27 18:17:00+00", status_raw: Lanes Closed, delay_min: null, is_open: false}
+          - {run_id: b, crossing_id: gordie_howe_bridge, direction: to_canada, lane: travellers, source_updated_at: "2026-10-27 18:00:00+00", fetched_at: "2026-10-27 18:17:00+00", status_raw: 900 minutes, delay_min: 900, is_open: true, quality_issue: delay_out_of_range}
+    expect:
+      rows:
+        - {crossing_id: ambassador_bridge, run_id: a, fetched_at: "2026-10-27 17:17:00+00", last_fetched_at: "2026-10-27 18:17:00+00", reading_at: "2026-10-27 17:00:00+00", time_basis: source, observations: 2, revised: true, status_raw: delay, delay_min: 40}
+        - {crossing_id: detroit_windsor_tunnel, run_id: a, fetched_at: "2026-10-27 17:17:00+00", last_fetched_at: "2026-10-27 17:17:00+00", reading_at: "2026-10-27 17:17:00+00", time_basis: fetch, observations: 1, revised: false, status_raw: Lanes Closed, delay_min: null}
+        - {crossing_id: detroit_windsor_tunnel, run_id: b, fetched_at: "2026-10-27 18:17:00+00", last_fetched_at: "2026-10-27 18:17:00+00", reading_at: "2026-10-27 18:17:00+00", time_basis: fetch, observations: 1, revised: false, status_raw: Lanes Closed, delay_min: null}
+
+  # D01: the latest reading is one whole row from the newest poll. Each series below is one transition.
+  - name: latest_readings_is_one_whole_row
+    model: latest_readings
+    given:
+      - input: ref('int_readings_matched')
+        rows:
+          # numeric -> pending: the newer row has no number, no open flag and no source time
+          - {run_id: a, source: cbp, crossing_id: ambassador_bridge, direction: to_us, lane: travellers, source_updated_at: "2026-10-27 17:00:00+00", fetched_at: "2026-10-27 17:17:00+00", status_raw: delay, delay_min: 10, is_open: true}
+          - {run_id: b, source: cbp, crossing_id: ambassador_bridge, direction: to_us, lane: travellers, source_updated_at: null, fetched_at: "2026-10-27 18:17:00+00", status_raw: Update Pending, delay_min: null, is_open: null}
+          # numeric -> closed
+          - {run_id: a, source: cbp, crossing_id: ambassador_bridge, direction: to_us, lane: commercial, source_updated_at: "2026-10-27 17:00:00+00", fetched_at: "2026-10-27 17:17:00+00", status_raw: delay, delay_min: 25, is_open: true}
+          - {run_id: b, source: cbp, crossing_id: ambassador_bridge, direction: to_us, lane: commercial, source_updated_at: null, fetched_at: "2026-10-27 18:17:00+00", status_raw: Lanes Closed, delay_min: null, is_open: false}
+          # numeric -> unknown (CBSA keeps a source time on 'Not Applicable')
+          - {run_id: a, source: cbsa, crossing_id: ambassador_bridge, direction: to_canada, lane: travellers, source_updated_at: "2026-10-27 17:05:00+00", fetched_at: "2026-10-27 17:17:00+00", status_raw: 15 minutes, delay_min: 15, is_open: true}
+          - {run_id: b, source: cbsa, crossing_id: ambassador_bridge, direction: to_canada, lane: travellers, source_updated_at: "2026-10-27 18:05:00+00", fetched_at: "2026-10-27 18:17:00+00", status_raw: Not Applicable, delay_min: null, is_open: null}
+          # unknown -> numeric
+          - {run_id: a, source: cbsa, crossing_id: ambassador_bridge, direction: to_canada, lane: commercial, source_updated_at: "2026-10-27 17:05:00+00", fetched_at: "2026-10-27 17:17:00+00", status_raw: Not Applicable, delay_min: null, is_open: null}
+          - {run_id: b, source: cbsa, crossing_id: ambassador_bridge, direction: to_canada, lane: commercial, source_updated_at: "2026-10-27 18:05:00+00", fetched_at: "2026-10-27 18:17:00+00", status_raw: 5 minutes, delay_min: 5, is_open: true}
+          # a tie on the fetch time (a re-run): the later run_id wins, whole
+          - {run_id: c-1, source: cbp, crossing_id: gordie_howe_bridge, direction: to_us, lane: travellers, source_updated_at: "2026-10-27 18:00:00+00", fetched_at: "2026-10-27 18:17:00+00", status_raw: delay, delay_min: 30, is_open: true}
+          - {run_id: c-2, source: cbp, crossing_id: gordie_howe_bridge, direction: to_us, lane: travellers, source_updated_at: "2026-10-27 18:00:00+00", fetched_at: "2026-10-27 18:17:00+00", status_raw: no delay, delay_min: 0, is_open: true}
+          # the newest poll has a quality issue: the newest eligible row is used, and its older observed_at shows
+          - {run_id: a, source: cbsa, crossing_id: gordie_howe_bridge, direction: to_canada, lane: travellers, source_updated_at: "2026-10-27 17:05:00+00", fetched_at: "2026-10-27 17:17:00+00", status_raw: 10 minutes, delay_min: 10, is_open: true}
+          - {run_id: b, source: cbsa, crossing_id: gordie_howe_bridge, direction: to_canada, lane: travellers, source_updated_at: "2026-10-27 18:05:00+00", fetched_at: "2026-10-27 18:17:00+00", status_raw: 900 minutes, delay_min: 900, is_open: true, quality_issue: delay_out_of_range}
+    expect:
+      rows:
+        - {crossing_id: ambassador_bridge, direction: to_canada, lane: commercial, source: cbsa, status_raw: 5 minutes, delay_min: 5, is_open: true, source_updated_at: "2026-10-27 18:05:00+00", observed_at: "2026-10-27 18:17:00+00", run_id: b}
+        - {crossing_id: ambassador_bridge, direction: to_canada, lane: travellers, source: cbsa, status_raw: Not Applicable, delay_min: null, is_open: null, source_updated_at: "2026-10-27 18:05:00+00", observed_at: "2026-10-27 18:17:00+00", run_id: b}
+        - {crossing_id: ambassador_bridge, direction: to_us, lane: commercial, source: cbp, status_raw: Lanes Closed, delay_min: null, is_open: false, source_updated_at: null, observed_at: "2026-10-27 18:17:00+00", run_id: b}
+        - {crossing_id: ambassador_bridge, direction: to_us, lane: travellers, source: cbp, status_raw: Update Pending, delay_min: null, is_open: null, source_updated_at: null, observed_at: "2026-10-27 18:17:00+00", run_id: b}
+        - {crossing_id: gordie_howe_bridge, direction: to_canada, lane: travellers, source: cbsa, status_raw: 10 minutes, delay_min: 10, is_open: true, source_updated_at: "2026-10-27 17:05:00+00", observed_at: "2026-10-27 17:17:00+00", run_id: a}
+        - {crossing_id: gordie_howe_bridge, direction: to_us, lane: travellers, source: cbp, status_raw: no delay, delay_min: 0, is_open: true, source_updated_at: "2026-10-27 18:00:00+00", observed_at: "2026-10-27 18:17:00+00", run_id: c-2}
+
+  # D08/D13: valid_days counts dates with an estimate; days also counts dates when the lane was only closed.
+  - name: agg_wait_by_hour_valid_days
+    model: agg_wait_by_hour
+    given:
+      - input: ref('fct_wait_readings_recent')
+        rows:
+          - {crossing_id: ambassador_bridge, direction: to_us, lane: travellers, iana_zone: America/Detroit, reading_at: "2026-10-27 17:00:00+00", delay_min: 10}
+          - {crossing_id: ambassador_bridge, direction: to_us, lane: travellers, iana_zone: America/Detroit, reading_at: "2026-10-27 17:30:00+00", delay_min: 20}
+          - {crossing_id: ambassador_bridge, direction: to_us, lane: travellers, iana_zone: America/Detroit, reading_at: "2026-10-28 17:10:00+00", delay_min: null}
+          - {crossing_id: ambassador_bridge, direction: to_us, lane: travellers, iana_zone: America/Detroit, reading_at: "2026-10-29 17:10:00+00", delay_min: 0}
+    expect:
+      rows:
+        - {crossing_id: ambassador_bridge, direction: to_us, lane: travellers, local_hour: 13, n: 3, days: 3, valid_days: 2, median_delay_min: 10}
 
   - name: fct_service_standard_january_is_second_year
     model: fct_service_standard_monthly
@@ -78,3 +144,32 @@ unit_tests:
       rows:
         - {month_start: 2019-04-01, crossing_id: ambassador_bridge}
         - {month_start: 2020-01-01, crossing_id: ambassador_bridge}
+
+  # D06: old defects are classified, not fatal and not dropped. q1: a malformed update time (strptime used to
+  # stop the whole build on it); q2: a delay outside 0-720; q3: CBSA's 'Temporarily closed', stored before the
+  # parser knew it, reads as closed; q4: an ordinary row; q5 sits in a quarantined snapshot and is skipped.
+  - name: stg_readings_quality_and_quarantine
+    model: stg_readings
+    given:
+      - input: source('raw', 'readings')
+        format: sql
+        rows: |
+          select 'q1'::varchar as run_id, 1 as schema_version, timestamptz '2026-10-27 17:26:00+00' as fetched_at, 'cbsa'::varchar as source, 'Ambassador Bridge'::varchar as source_crossing_name, null::varchar as source_location, null::varchar as cbp_port_number, null::varchar as port_status, 'to_canada'::varchar as direction, 'travellers'::varchar as lane, 'standard'::varchar as lane_type, '5 minutes'::varchar as status_raw, 5::integer as delay_min, true::boolean as is_open, null::integer as lanes_open, '2026-13-45 99:99 EDT'::varchar as source_updated_raw, 'EDT'::varchar as source_tz_abbrev, 'snapshots/source=cbsa/date=2026-10-27/172600.parquet'::varchar as filename
+          union all
+          select 'q2', 1, timestamptz '2026-10-27 17:26:00+00', 'cbsa', 'Ambassador Bridge', null, null, null, 'to_canada', 'commercial', 'standard', '900 minutes', 900, true, null, '2026-10-27 13:00 EDT', 'EDT', 'snapshots/source=cbsa/date=2026-10-27/172600.parquet'
+          union all
+          select 'q3', 1, timestamptz '2026-10-27 17:26:00+00', 'cbsa', 'Blue Water Bridge', null, null, null, 'to_canada', 'travellers', 'standard', 'Temporarily closed', null, null, null, '2026-10-27 13:00 EDT', 'EDT', 'snapshots/source=cbsa/date=2026-10-27/172600.parquet'
+          union all
+          select 'q4', 1, timestamptz '2026-10-27 17:26:00+00', 'cbsa', 'Blue Water Bridge', null, null, null, 'to_canada', 'commercial', 'standard', 'No Delay', 0, true, null, '2026-10-27 13:00 EDT', 'EDT', 'snapshots/source=cbsa/date=2026-10-27/172600.parquet'
+          union all
+          select 'q5', 1, timestamptz '2026-10-27 19:02:28+00', 'cbsa', 'Blue Water Bridge', null, null, null, 'to_canada', 'commercial', 'standard', 'No Delay', 0, true, null, '2026-10-27 13:00 EDT', 'EDT', '/any/prefix/snapshots/source=cbsa/date=2026-10-27/190228.parquet'
+      - *xing
+      - input: ref('excluded_snapshots')
+        rows:
+          - {path: "snapshots/source=cbsa/date=2026-10-27/190228.parquet", reason: test}
+    expect:
+      rows:
+        - {run_id: q1, source_updated_at: null, quality_issue: unparsed_update_time, is_open: true}
+        - {run_id: q2, source_updated_at: "2026-10-27 17:00:00+00", quality_issue: delay_out_of_range, is_open: true}
+        - {run_id: q3, source_updated_at: "2026-10-27 17:00:00+00", quality_issue: null, is_open: false}
+        - {run_id: q4, source_updated_at: "2026-10-27 17:00:00+00", quality_issue: null, is_open: true}
