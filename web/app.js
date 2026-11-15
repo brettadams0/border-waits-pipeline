@@ -137,7 +137,7 @@ function renderChart() {
   const days = (h) => daysOf(by.get(h));
   const hours = [...Array(24).keys()], at = (min) => hours.filter((h) => days(h) >= min);
   // drawn at the box's real width, so the labels keep their size on a phone
-  const W = Math.max(260, $('chart').clientWidth), H = 240, L = 30, R = 12, T = 12, B = 26;
+  const W = Math.max(220, $('chart').clientWidth), H = 240, L = 30, R = 12, T = 12, B = 26;
   const max = Math.max(10, ...at(g.min_days_point).map((h) => by.get(h)[days(h) >= g.min_days_band ? 'p90_delay_min' : 'median_delay_min']));
   const x = (h) => +(L + h / 23 * (W - L - R)).toFixed(1), y = (v) => +(H - B - v / max * (H - T - B)).toFixed(1);
   const pt = (h, k) => `${x(h)},${y(by.get(h)[k])}`;
@@ -297,6 +297,7 @@ setInterval(() => { if (D) { renderHead(); renderNow(); renderPipeline(true); } 
 $('sql-load').addEventListener('click', async () => {
   const b = $('sql-load');
   b.disabled = true;
+  $('sql-status').textContent = 'Loading DuckDB…';  // also clears the message of an earlier failed try
   try {
     sql = await import('./sql-console.js');
     await sql.start(D, (text) => { b.textContent = text; });
