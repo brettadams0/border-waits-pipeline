@@ -74,8 +74,8 @@ for (const w of [1440, 390]) {
   out(`w${w} sql: a long result stops at 200 rows and says the rest was not fetched`, r.rows === 200 && /^The first 200 rows; the query returned more, and the rest were not fetched/.test(r.caption) && /select \* from range\(1000\)/.test(r.caption), r);
   r = await p.run('select 1 as a where false');
   out(`w${w} sql: zero rows is a result, with its columns`, r.rows === 0 && /^0 rows/.test(r.caption) && !r.err, r);
-  r = await p.run("select null as n, 9007199254740993::hugeint as big, repeat('x', 1000) as long, timestamptz '2026-11-14 17:00:00+00' as t, date '2026-11-14' as d");
-  out(`w${w} sql: nulls, big integers, long strings and times print as themselves`, r.first && r.first[0] === 'null' && r.first[1] === '9007199254740993' && r.first[2].length === 301 && r.first[3] === '2026-11-14 17:00:00Z' && r.first[4] === '2026-11-14', r.first && r.first.map((x) => x.slice(0, 40)));
+  r = await p.run("select null as n, 9007199254740993::hugeint as big, repeat('x', 1000) as long, timestamptz '2026-11-14 17:00:00+00' as t, date '2026-11-14' as d, 0.1::double + 0.2::double as f, 12.5::double as g");
+  out(`w${w} sql: nulls, big integers, long strings, times and doubles print as themselves`, r.first && r.first[0] === 'null' && r.first[1] === '9007199254740993' && r.first[2].length === 301 && r.first[3] === '2026-11-14 17:00:00Z' && r.first[4] === '2026-11-14' && r.first[5] === '0.3' && r.first[6] === '12.5', r.first && r.first.map((x) => x.slice(0, 40)));
   r = await p.run('   ');
   out(`w${w} sql: an empty query is refused politely`, /Nothing to run/.test(r.status), r);
   await p.run('select 42 as answer');
