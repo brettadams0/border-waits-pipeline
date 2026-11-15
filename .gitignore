@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 target/
 dbt/target/
+dbt/target-freshness/
 dbt/logs/
 public/
 datastore/

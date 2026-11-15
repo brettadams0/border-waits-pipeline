@@ -122,10 +122,13 @@ node web/test/sql.mjs public/data/v1      # needs jsDelivr and extensions.duckdb
   out the `data` branch as `datastore/`, build, and export with `--snapshot`:
   ```sh
   git fetch --depth 1 origin data && git worktree add datastore FETCH_HEAD
-  (cd dbt && ../.venv/bin/dbt build --profiles-dir . --vars "{run_id: '', datastore: ../datastore}" --exclude tag:freshness)
-  .venv/bin/python -m export --run-id "snapshot-of-<newest run id>" --data-sha "$(git -C datastore rev-parse --short HEAD)" \
-    --git-sha "$(git rev-parse HEAD)" --out /tmp/export --previous /tmp/none --snapshot web/fallback
+  RUN=$(git -C datastore log -1 --format=%s | awk '{print $2}')     # the newest run's id, from its commit message
+  (cd dbt && ../.venv/bin/dbt build --profiles-dir . --vars "{run_id: $RUN, datastore: ../datastore}" --exclude tag:freshness
+   ../.venv/bin/dbt test --profiles-dir . --vars "{run_id: $RUN, datastore: ../datastore}" --select tag:freshness --target-path target-freshness)
+  .venv/bin/python -m export --run-id "snapshot-of-$RUN" --data-sha "$(git -C datastore rev-parse --short HEAD)" \
+    --git-sha "$(git rev-parse HEAD)" --out /tmp/export/data/v1 --previous /tmp/none --snapshot web/fallback
   .venv/bin/python -m export.snapshot_check web/fallback --max-age-days 14
+  git worktree remove --force datastore
   ```
   Then re-sync the site's copy (its README has the rsync line).
 - **New crossing name:** `unmatched_crossings` warns with the name; add a `dim_crossing` row.

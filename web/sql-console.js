@@ -102,7 +102,8 @@ boot.tries = 0;
 
 // The compiled model SQL names its inputs "bwt"."main"."<table>", as dbt built them. The views live in that
 // same catalog and it is made the default, so a model's SQL and the short names in the questions both
-// resolve, whether or not the rebuild check has run.
+// resolve, whether or not the rebuild check has run. Times print in UTC (cell()); the models and the
+// questions name their zones, so only a visitor's own zone-less hour() or ::date follows the browser's zone.
 async function openData(d) {
   const { manifest, base } = d;
   await conn.query(`attach if not exists ':memory:' as bwt`);
@@ -110,7 +111,6 @@ async function openData(d) {
     if (f.url.endsWith('.parquet')) await conn.query(`create or replace view bwt.main.${name} as select * from read_parquet('${new URL(f.url, base).href}')`);
   }
   await conn.query('use bwt');
-  await conn.query(`set TimeZone = 'UTC'`);  // as the pipeline's own rebuild check; not the visitor's zone
   version = (await conn.query('select version() as v, (select count(*) from dim_crossing) as n')).toArray()[0].v;
   open = { manifest, base, live: d.live, gates: { ...GATES, ...d.summary.chart } };
 }
@@ -238,8 +238,13 @@ async function check() {
     const r = await fetch(new URL(rc.sql, open.base));
     if (!r.ok) throw Error(`HTTP ${r.status} for the model's SQL`);
     const sql = await r.text();
-    // the view is put back first, so the check does not depend on what was run before it
+    // The view is put back first, and the check runs in UTC as the export's did, so it depends neither on
+    // what was run before it nor on the visitor's zone. The session's zone is then put back: DuckDB-Wasm
+    // starts in the browser's zone, and a query must mean the same before and after this button.
+    // (Setting the zone needs DuckDB's 2 MB ICU extension, which the model's own timezone() calls load
+    // here anyway; setting it at start-up would add that to every first load.)
     await conn.query(`create or replace view bwt.main.fct_wait_readings_recent as select * from read_parquet('${new URL(rc.input, open.base).href}')`);
+    await conn.query(`set TimeZone = 'UTC'`);
     const got = (await conn.query(rc.check_sql.replace('{sql}', () => sql))).toArray()[0], exp = rc.expected;
     const same = Number(got.n) === exp.n && Number(got.sum) === exp.sum && got.md5 === exp.md5;
     out.textContent = same
@@ -248,6 +253,7 @@ async function check() {
   } catch (e) {
     out.textContent = `Rebuild check failed: ${e.message}`;
   } finally {
+    await conn.query('reset TimeZone').catch(() => {});
     setBusy(false);
   }
 }

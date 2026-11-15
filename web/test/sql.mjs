@@ -10,8 +10,8 @@ const srv = serve(dataDir);
 const b = await launch();
 const CDN = /jsdelivr|extensions\.duckdb/;
 
-async function open(width, routes = {}) {
-  const ctx = await b.newContext({ viewport: { width, height: 900 } });
+async function open(width, routes = {}, context = {}) {
+  const ctx = await b.newContext({ viewport: { width, height: 900 }, ...context });
   const p = await ctx.newPage();
   p.errors = []; p.reqs = []; p.workers = 0;
   p.on('pageerror', (e) => p.errors.push(`uncaught: ${e.message}`));
@@ -49,6 +49,9 @@ for (const w of [1440, 390]) {
   const sizes = [];
   p.on('requestfinished', async (r) => { try { const s = await r.sizes(); sizes.push([new URL(r.url()).origin, s.responseBodySize + s.responseHeadersSize]); } catch {} });
   await p.load();
+  await p.waitForTimeout(500);
+  // measured here, before Reset or a hard Stop start further workers (each one fetches the engine again)
+  const firstLoad = sizes.filter(([o]) => !o.includes('127.0.0.1'));
   let r = await p.result();
   out(`w${w} sql: loads and runs the selected question`, !r.err && r.rows > 0 && /^DuckDB v1\.4\.3 in your browser/.test(r.status), r);
   out(`w${w} sql: the page is no wider than the viewport once the console is open (was 573px at 390)`, await p.sw() === w, await p.sw());
@@ -114,13 +117,27 @@ for (const w of [1440, 390]) {
   out(`w${w} sql: Ctrl+Enter runs the editor`, r.first && r.first[0] === '99', r);
 
   if (w === 1440) {
-    const ext = sizes.filter(([o]) => !o.includes('127.0.0.1'));
-    const bytes = ext.reduce((a, [, n]) => a + n, 0);
+    const bytes = firstLoad.reduce((a, [, n]) => a + n, 0);
     const origins = [...new Set(p.reqs.filter((u) => /^https?:/.test(u) && !u.includes('127.0.0.1')).map((u) => new URL(u).origin))].sort();
     out('sql: third-party origins are exactly jsDelivr and extensions.duckdb.org', JSON.stringify(origins) === JSON.stringify(['https://cdn.jsdelivr.net', 'https://extensions.duckdb.org']), origins);
-    out('sql: a first load is under 8.5 MB from third parties', bytes > 0 && sizes.length > 0 && ext.filter(([, n]) => n > 1e6).reduce((a, [, n]) => a + n, 0) < 8.5e6, { bytes, requests: ext.length });
+    out('sql: the first load is under 8.5 MB from third parties, in at most 8 requests', bytes > 1e6 && bytes < 8.5e6 && firstLoad.length <= 8, { bytes, requests: firstLoad.length, list: firstLoad.map(([o, n]) => `${o} ${n}`) });
   }
   out(`w${w} sql: no uncaught errors through all of it`, p.errors.length === 0, p.errors);
+  await p.context().close();
+}
+
+// ---------- F03: the visitor's time zone changes neither the rebuild check nor what a query means ----------
+{
+  const p = await open(1440, {}, { timezoneId: 'America/Vancouver' });
+  await p.load();
+  const q = "select hour(timestamptz '2026-11-14 17:00:00+00') as h, timestamptz '2026-11-14 17:00:00+00' as t";
+  const before = await p.run(q);
+  await p.click('#sql-check');
+  await p.waitForFunction(() => /Matches|Differs|failed/.test(document.getElementById('sql-check-result').textContent), null, { timeout: 60000 });
+  const check = await p.textContent('#sql-check-result');
+  const after = await p.run(q);
+  out('zone: in a browser eight hours from UTC the rebuild check still matches the pipeline (it runs in UTC)', /^Matches the pipeline's build/.test(check), check);
+  out('zone: the same query gives the same answer before and after the rebuild check; times print in UTC', before.first && JSON.stringify(before.first) === JSON.stringify(after.first) && before.first[1] === '2026-11-14 17:00:00Z', { before: before.first, after: after.first });
   await p.context().close();
 }
 

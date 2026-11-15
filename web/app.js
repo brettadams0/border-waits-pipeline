@@ -258,7 +258,7 @@ function state(note, retry, saved) {
 async function start(want) {
   for (const id of ['now', 'hours']) $(id).setAttribute('aria-busy', 'true');
   $('retry').hidden = $('use-saved').hidden = true;
-  $('data-note').textContent = D ? 'Loading…' : '';
+  if (D) $('data-note').textContent = 'Loading…';
   let next = null, why = '';
   if (want !== 'saved') try { next = await load(LIVE, true); } catch (e) { why = e.message; }
   if (!next) try { next = { ...await load(SAVED, false), why }; } catch (e) {
@@ -270,16 +270,16 @@ async function start(want) {
   const { summary: s, manifest: m, live } = D;
   try {
     pickers(); renderHead(); renderNow(); renderHeat(); renderChart(); renderPipeline(); renderHow();
-    $('collecting').textContent = m.collecting_since && time(m.collecting_since) ? `Collecting since ${clock(toDate(m.collecting_since), { dateStyle: 'medium' })}.` : '';
+    $('collecting').textContent = live && s.latest.length && time(m.collecting_since) ? `Collecting since ${clock(toDate(m.collecting_since), { dateStyle: 'medium' })}.` : '';
   } catch (e) {  // the contract check should make this unreachable; if it isn't, say so rather than leave half a page
     D = before;
     return state(`Couldn't show the ${live ? 'live data' : 'saved snapshot'} (${e.message}).`, true, live);
   }
   $('sql-load').disabled = false;
   if (sql) sql.start(D).catch(() => {});  // the console follows the data that is on screen
+  // kept to a line: the badge above already says which snapshot is showing, and a tall notice would push the page down
   state(live ? (s.latest.length ? '' : 'The pipeline has published no readings yet.')
-    : want === 'saved' ? `Showing the saved snapshot from ${clock(toDate(seenAt()), { dateStyle: 'medium' })}.`
-    : `Live data couldn't be loaded (${why}). Showing a saved snapshot from ${clock(toDate(seenAt()), { dateStyle: 'medium' })} instead.`,
+    : want === 'saved' ? 'Showing the saved snapshot.' : `Live data couldn't be loaded (${why}).`,
   !live, live && !s.latest.length);
 }
 

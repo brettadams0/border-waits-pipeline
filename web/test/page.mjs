@@ -65,7 +65,7 @@ for (const w of [320, 390, 768, 1440]) {
       scale: box.width / svg.viewBox.baseVal.width, font: parseFloat(getComputedStyle(svg.querySelector('text')).fontSize),
       heat: [...document.querySelectorAll('#heat button')].map((x) => x.querySelectorAll('.cells i').length), map: document.querySelectorAll('#map .x').length,
       runs: document.querySelectorAll('.runs i').length, how: document.querySelectorAll('#how > div b').length,
-      pipe: document.getElementById('pipeline').textContent, collecting: document.getElementById('collecting').textContent,
+      pipe: document.getElementById('pipeline').textContent, collecting: document.getElementById('collecting').textContent, stateH: document.querySelector('.state').getBoundingClientRect().height,
       small: [...document.querySelectorAll('main button:not([hidden]), main select, main summary, main a.button')].filter((e) => e.offsetParent && e.getBoundingClientRect().height < 24).length };
   });
   const st = await p.state();
@@ -141,7 +141,7 @@ for (const w of [320, 390, 768, 1440]) {
   let p = await open(390, { routes: { [LIVE + '**']: abort } });
   await p.settle();
   let st = await p.state();
-  out('startup: live unreachable -> saved snapshot, labelled, with a retry; SQL still offered', /^Live data couldn't be loaded \(.+\)\. Showing a saved snapshot from \w+ \d+, \d{4} instead\.$/.test(st.note) && /^snapshot readings of .*not current/.test(st.badge) && st.retry && st.rows === 6 && st.sql && p.errors.length === 0, { st, errors: p.errors });
+  out('startup: live unreachable -> saved snapshot, labelled, with a retry; SQL still offered', /^Live data couldn't be loaded \(.+\)\.$/.test(st.note) && /^snapshot readings of .*not current/.test(st.badge) && st.retry && st.rows === 6 && st.sql && p.errors.length === 0, { st, errors: p.errors });
   const now = await p.evaluate(() => [document.getElementById('now-note').textContent, document.getElementById('pipeline').textContent, document.querySelectorAll('#chart circle').length, document.querySelector('#now-table td small').textContent]);
   out('startup: snapshot readings carry their date, not "ago", and the chart has points', /^A saved snapshot: .* Not current\.$/.test(now[0]) && /A saved snapshot: readings up to/.test(now[1]) && now[2] > 0 && /\d{4}/.test(now[3]) && !/ago/.test(now[3]), now);
   await p.unroute(LIVE + '**');
@@ -202,7 +202,7 @@ for (const w of [320, 390, 768, 1440]) {
   out('startup: an export with no readings says so and offers the snapshot', st.note === 'The pipeline has published no readings yet.' && st.saved && !st.retry && /No readings have been published/.test(empty[0]) && /No data/.test(empty[1]) && /not enough days/.test(empty[2]) && p.errors.length === 0, { st, empty, errors: p.errors });
   await p.click('#use-saved'); await p.settle();
   st = await p.state();
-  out('startup: ...and "Show the saved snapshot" does', /^Showing the saved snapshot from/.test(st.note) && /^snapshot/.test(st.badge) && st.retry, st);
+  out('startup: ...and "Show the saved snapshot" does', st.note === 'Showing the saved snapshot.' && /^snapshot/.test(st.badge) && st.retry, st);
   await p.context().close();
 }
 
