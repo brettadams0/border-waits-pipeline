@@ -143,8 +143,12 @@ def cadence(con):
                max(minutes_since_previous) filter (where fetched_at > newest - interval 7 day),
                count(*) filter (where fetched_at > newest - interval 24 hour)
         from r""").fetchone()
+    recent = [r[0] for r in con.execute("""
+        select strftime(fetched_at, '%Y-%m-%dT%H:%M:%SZ') from main.pipeline_runs
+        where fetched_at > (select max(fetched_at) from main.pipeline_runs) - interval 7 day order by fetched_at""").fetchall()]
     return {"runs_24h": runs_24h, "runs_7d": runs_7d,
-            "median_gap_minutes_7d": None if median_gap is None else round(median_gap), "max_gap_minutes_7d": max_gap}
+            "median_gap_minutes_7d": None if median_gap is None else round(median_gap), "max_gap_minutes_7d": max_gap,
+            "recent_runs": recent}  # at most 336 (two a hour): the page draws them as a timeline
 
 
 def retained_files(manifest):
