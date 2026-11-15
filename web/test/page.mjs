@@ -1,5 +1,7 @@
 // Page checks in Chromium, offline and deterministic: node web/test/page.mjs <data-dir>
 //   <data-dir> holds an export (manifest.json, status.json, ...), served at /border-waits-pipeline/data/v1/.
+//   It must be exported within minutes of its newest poll, as the pipeline's and CI's exports are: the
+//   test's "now" is ten minutes after the export, and a "live" badge is expected at that moment.
 // Every fault is injected by intercepting the page's own requests; nothing real is broken and the
 // clock is the test's. The SQL console needs DuckDB-Wasm from the network: see sql.mjs.
 import fs from 'node:fs'; import path from 'node:path';
@@ -68,7 +70,7 @@ for (const w of [320, 390, 768, 1440]) {
   });
   const st = await p.state();
   out(`w${w}: no errors, nothing wider than the viewport`, p.errors.length === 0 && g.sw === w && g.overflow.length === 0, { errors: p.errors, sw: g.sw, overflow: g.overflow });
-  out(`w${w}: live badge, no notice, 3 crossings x 2 directions, SQL button ready`, /^live last run 10 min ago · [\d,]+ readings$/.test(st.badge) && st.note === '' && !st.retry && st.rows === 6 && st.sql, st);
+  out(`w${w}: live badge, no notice, 3 crossings x 2 directions, SQL button ready`, /^live last run \d+ min ago · [\d,]+ readings$/.test(st.badge) && st.note === '' && !st.retry && st.rows === 6 && st.sql, st);
   out(`w${w}: chart drawn at 1:1, so its labels are a real ${g.font}px (was 11px scaled to 3.9px at 320)`, Math.abs(g.scale - 1) < 0.01 && g.font >= 11, g);
   out(`w${w}: schematic, 12 x 24 heat grid, run strip and 4 step tiles are drawn from the data`, g.map === 3 && g.heat.length === 12 && g.heat.every((n) => n === 24) && g.runs === manifest0.cadence.recent_runs.filter((t) => Date.parse(t) >= T0 - 7 * 864e5).length && g.how === 4, g);
   out(`w${w}: pipeline summary and collecting line come from the manifest; no control under 24px`, /Last successful run: .*\(10 min ago\)/.test(g.pipe) && /^Collecting since \w/.test(g.collecting) && g.small === 0, g);
@@ -129,7 +131,7 @@ for (const w of [320, 390, 768, 1440]) {
   const failing = await open(390, { routes: live(() => {}, { run_id: 'x-1', time: new Date(T0 - 5 * MIN).toISOString(), result: 'failure', failed_step: 'dbt build', failed_stage: 'build', collected: true, run_url: 'https://example.test/run', last_success: null }) });
   await failing.settle();
   const f = await failing.evaluate(() => [document.getElementById('live-badge').textContent, document.getElementById('pipeline').textContent]);
-  out('freshness: a failed last attempt over older data says so, and that the readings were stored', /^failing the last run failed 5 min ago; data from 10 min ago/.test(f[0]) && /failed at dbt build/.test(f[1]) && /readings were stored/.test(f[1]), f);
+  out('freshness: a failed last attempt over older data says so, and that the readings were stored', /^failing the last run failed 5 min ago; data from \d+ min ago/.test(f[0]) && /failed at dbt build/.test(f[1]) && /readings were stored/.test(f[1]), f);
   await failing.context().close();
 }
 

@@ -171,10 +171,11 @@ function renderChart() {
 }
 
 function renderHead() {
-  const { manifest: m, status: st, live } = D, ran = `${span(age(m.generated_at))} ago`;
+  // "live" needs both a recent export and a recent poll behind it: the older of the two is the one shown
+  const { manifest: m, status: st, live } = D, last = Math.max(age(m.generated_at), age(seenAt())), ran = `${span(last)} ago`;
   const [k, text] = !live ? ['snapshot', `readings of ${clock(toDate(seenAt()), { dateStyle: 'medium' })}, not current`]
     : st?.result === 'failure' ? ['failing', `the last run failed ${span(age(st.time))} ago; data from ${ran}`]
-    : age(m.generated_at) > STALE ? ['delayed', `last run ${ran}`] : ['live', `last run ${ran}`];
+    : last > STALE ? ['delayed', `last run ${ran}`] : ['live', `last run ${ran}`];
   $('live-badge').innerHTML = `${badge(k)} ${esc(text)} · ${(+m.files.fct_wait_readings.rows || 0).toLocaleString('en-CA')} readings`;
 }
 

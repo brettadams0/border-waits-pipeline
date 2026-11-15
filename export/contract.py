@@ -64,7 +64,7 @@ def problems(manifest, summary):
     for r in summary.get("latest") or []:
         ok = (isinstance(r, dict) and isinstance(r.get("crossing_id"), str) and r.get("direction") in DIRECTIONS
               and r.get("lane") in LANES and _number(r.get("delay_min"), True)
-              and r.get("is_open") in (True, False, None) and _time(r.get("source_updated_at"), True)
+              and (r.get("is_open") is None or isinstance(r.get("is_open"), bool)) and _time(r.get("source_updated_at"), True)
               and _time(r.get("observed_at"), True))
         if not ok:
             out.append(f"summary.latest: bad row {r!r}")
