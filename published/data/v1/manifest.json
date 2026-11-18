@@ -1,10 +1,10 @@
 {
  "schema_version": 1,
- "generated_at": "2026-11-18T21:36:15Z",
- "run_id": "44403057642-1",
- "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/44403057642",
+ "generated_at": "2026-11-18T21:55:38Z",
+ "run_id": "44406342615-1",
+ "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/44406342615",
  "git_sha": "2d9940a73b2b44a12f403af810813733abe076a9",
- "data_sha": "bee18a0079a7150fae8f15e8de0ee244432f79e4",
+ "data_sha": "d6a1e300a6bc45c718359ebaebf471a9895627a2",
  "collecting_since": "2026-10-27 19:05:08+00:00",
  "duckdb_version": "1.4.3",
  "dbt_version": "1.12.6",
@@ -16,34 +16,34 @@
    "bytes": 4278
   },
   "fct_wait_readings": {
-   "url": "fct_wait_readings.83ec932f.parquet",
-   "sha256": "83ec932fee935a780d65eca3299d12dcd9714712db70c404f0874289202605a8",
-   "rows": 13777,
-   "bytes": 171653
+   "url": "fct_wait_readings.7c8b21d4.parquet",
+   "sha256": "7c8b21d46dcb1dbfb4bbd6562c73db7da3744a5e3e4063ea30de470005236b4e",
+   "rows": 13812,
+   "bytes": 171180
   },
   "fct_wait_readings_recent": {
-   "url": "fct_wait_readings_recent.fff9560f.parquet",
-   "sha256": "fff9560fcaa64f2cbf2e023305dee0fe1a7a47936100837426749b0a76b0dca0",
-   "rows": 13775,
-   "bytes": 171740
+   "url": "fct_wait_readings_recent.8ae6e376.parquet",
+   "sha256": "8ae6e3762347cc00eafc414768637a20b990bd918257aa123340e83eee9d4643",
+   "rows": 13810,
+   "bytes": 171225
   },
   "latest_readings": {
-   "url": "latest_readings.973f9bb4.parquet",
-   "sha256": "973f9bb41d3910ebc529bc29285c76f6d8177ecdcd503e6675af0a4c3ad88f9a",
+   "url": "latest_readings.d75d8445.parquet",
+   "sha256": "d75d8445822613c1d48a3ec936b4264d16f4a68823ef9c7cdff7490cff050d13",
    "rows": 120,
-   "bytes": 3558
+   "bytes": 3528
   },
   "agg_wait_by_hour": {
-   "url": "agg_wait_by_hour.0c20271b.parquet",
-   "sha256": "0c20271b00b21030d8c0cd9fce212e05375cbdbeb43a66434c6707aa4e3fd78e",
+   "url": "agg_wait_by_hour.813a175f.parquet",
+   "sha256": "813a175f828cd2fdaa8bc53ee9d08ab0829ba8e4338a96f3eb871d34d8470557",
    "rows": 2658,
-   "bytes": 9931
+   "bytes": 9962
   },
   "agg_wait_by_weekday_hour": {
-   "url": "agg_wait_by_weekday_hour.068ac640.parquet",
-   "sha256": "068ac640cd9723955099257ba9b98f885255fd096b3ddad6ddd97d542438a774",
-   "rows": 10050,
-   "bytes": 19240
+   "url": "agg_wait_by_weekday_hour.c9743d1b.parquet",
+   "sha256": "c9743d1bb97cabc8b040aa307843f7b5aa60c0cf039dc8a5986fc9fd1e845922",
+   "rows": 10052,
+   "bytes": 19301
   },
   "fct_service_standard_monthly": {
    "url": "fct_service_standard_monthly.fbda04b3.parquet",
@@ -76,8 +76,8 @@
    "bytes": 860
   },
   "summary": {
-   "url": "summary.44403057642-1.json",
-   "sha256": "bd024fe901ba68569821348c0835e5aad25fa5e3095a98d0686ce9bfa58c6cf5",
+   "url": "summary.44406342615-1.json",
+   "sha256": "308478ff532bfbc5353781254282272cad380f2c52bbe3434fe65d76277bf25a",
    "rows": null,
    "bytes": 51124
   }
@@ -88,17 +88,17 @@
    "licence": "Open Government Licence \u2013 Canada",
    "licence_url": "https://open.canada.ca/en/open-government-licence-canada",
    "attribution": "Contains information licensed under the Open Government Licence \u2013 Canada.",
-   "last_fetched_at": "2026-11-18 21:36:01+00:00",
-   "newest_source_updated_at": "2026-11-18 22:20:00+00:00",
-   "lag_minutes": 21,
+   "last_fetched_at": "2026-11-18 21:55:19+00:00",
+   "newest_source_updated_at": "2026-11-18 22:40:00+00:00",
+   "lag_minutes": 40,
    "freshness": "pass",
    "last_run": {
     "crossings": 30,
     "rows": 60,
     "timed_rows": 60,
-    "stamped_ahead": 12,
-    "median_age_minutes": 21,
-    "oldest_age_minutes": 97,
+    "stamped_ahead": 10,
+    "median_age_minutes": 40,
+    "oldest_age_minutes": 116,
     "older_than_2h": 0
    }
   },
@@ -107,17 +107,17 @@
    "licence": "Public domain (U.S. government work)",
    "licence_url": "https://www.cbp.gov/site-policy-notices/copyright",
    "attribution": "Source: U.S. Customs and Border Protection",
-   "last_fetched_at": "2026-11-18 21:36:01+00:00",
+   "last_fetched_at": "2026-11-18 21:55:19+00:00",
    "newest_source_updated_at": "2026-11-19 04:00:00+00:00",
-   "lag_minutes": 36,
+   "lag_minutes": 8,
    "freshness": "pass",
    "last_run": {
     "crossings": 30,
     "rows": 60,
     "timed_rows": 50,
-    "stamped_ahead": 13,
-    "median_age_minutes": 36,
-    "oldest_age_minutes": 576,
+    "stamped_ahead": 18,
+    "median_age_minutes": 8,
+    "oldest_age_minutes": 595,
     "older_than_2h": 8
    }
   },
@@ -129,9 +129,9 @@
   }
  },
  "cadence": {
-  "runs_24h": 7,
-  "runs_7d": 49,
-  "median_gap_minutes_7d": 175,
+  "runs_24h": 8,
+  "runs_7d": 50,
+  "median_gap_minutes_7d": 174,
   "max_gap_minutes_7d": 548,
   "recent_runs": [
    "2026-11-11T21:56:09Z",
@@ -182,7 +182,8 @@
    "2026-11-18T04:18:14Z",
    "2026-11-18T13:26:43Z",
    "2026-11-18T13:56:24Z",
-   "2026-11-18T21:36:01Z"
+   "2026-11-18T21:36:01Z",
+   "2026-11-18T21:55:19Z"
   ]
  },
  "tests": {
@@ -191,14 +192,14 @@
   "error": 0,
   "skip": 0,
   "warnings": [
-   "warn_source_updated_ahead: 23 rows",
+   "warn_source_updated_ahead: 22 rows",
    "warn_tz_abbrev_matches_zone: 1 rows",
    "warn_history_metadata_age: 1 rows"
   ],
   "details": [
    {
     "name": "warn_source_updated_ahead",
-    "rows": 23,
+    "rows": 22,
     "text": "readings stamped more than 15 minutes after their fetch (CBP stamps the coming hour)"
    },
    {
@@ -215,23 +216,23 @@
  },
  "quality": {
   "excluded": [],
-  "fetch_timed_readings": 1888,
+  "fetch_timed_readings": 1898,
   "revised_readings": 2
  },
  "cost": {
-  "run_seconds": 14.0,
-  "snapshot_bytes_added": 10832,
-  "data_branch_bytes": 2509120
+  "run_seconds": 18.0,
+  "snapshot_bytes_added": 10829,
+  "data_branch_bytes": 2522037
  },
  "rebuild_check": {
   "model": "agg_wait_by_hour",
   "sql": "sql/agg_wait_by_hour.cc1ca31c.sql",
-  "input": "fct_wait_readings_recent.fff9560f.parquet",
+  "input": "fct_wait_readings_recent.8ae6e376.parquet",
   "check_sql": "with t as (\n{sql}\n) select count(*) as n, sum(t.n) as sum, md5(string_agg(t::varchar, '|' order by t::varchar)) as md5 from t",
   "expected": {
    "n": 2658,
-   "sum": 11494,
-   "md5": "e92b48a04f4bf7afd5058bf1a85f257d"
+   "sum": 11517,
+   "md5": "2b6d93702a7d99b8741baa10a5459233"
   }
  },
  "retention": {
