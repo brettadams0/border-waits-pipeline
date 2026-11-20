@@ -1,5 +1,23 @@
 [
  {
+  "run_id": "44719584094-1",
+  "generated_at": "2026-11-20T10:29:36Z",
+  "files": [
+   "agg_wait_by_hour.d8554ded.parquet",
+   "agg_wait_by_weekday_hour.f27a7a30.parquet",
+   "dim_crossing.ee85a427.parquet",
+   "fct_service_standard_monthly.fbda04b3.parquet",
+   "fct_wait_readings.ee2ea146.parquet",
+   "fct_wait_readings_recent.ce78d6a6.parquet",
+   "latest_readings.0216bf99.parquet",
+   "sql/agg_wait_by_hour.cc1ca31c.sql",
+   "sql/agg_wait_by_weekday_hour.3bca5629.sql",
+   "sql/fct_service_standard_monthly.ec1d0646.sql",
+   "stg_cbsa_land_monthly.262b067e.parquet",
+   "summary.44719584094-1.json"
+  ]
+ },
+ {
   "run_id": "44666074339-1",
   "generated_at": "2026-11-20T03:12:44Z",
   "files": [
@@ -15,42 +33,6 @@
    "sql/fct_service_standard_monthly.ec1d0646.sql",
    "stg_cbsa_land_monthly.262b067e.parquet",
    "summary.44666074339-1.json"
-  ]
- },
- {
-  "run_id": "44661902520-1",
-  "generated_at": "2026-11-20T02:36:20Z",
-  "files": [
-   "agg_wait_by_hour.8fbd022c.parquet",
-   "agg_wait_by_weekday_hour.dae0bf8c.parquet",
-   "dim_crossing.ee85a427.parquet",
-   "fct_service_standard_monthly.fbda04b3.parquet",
-   "fct_wait_readings.f68f1f2e.parquet",
-   "fct_wait_readings_recent.efc295ce.parquet",
-   "latest_readings.f601fa71.parquet",
-   "sql/agg_wait_by_hour.cc1ca31c.sql",
-   "sql/agg_wait_by_weekday_hour.3bca5629.sql",
-   "sql/fct_service_standard_monthly.ec1d0646.sql",
-   "stg_cbsa_land_monthly.262b067e.parquet",
-   "summary.44661902520-1.json"
-  ]
- },
- {
-  "run_id": "44619385522-1",
-  "generated_at": "2026-11-19T21:30:51Z",
-  "files": [
-   "agg_wait_by_hour.f1678d77.parquet",
-   "agg_wait_by_weekday_hour.0e86870c.parquet",
-   "dim_crossing.ee85a427.parquet",
-   "fct_service_standard_monthly.fbda04b3.parquet",
-   "fct_wait_readings.24230a78.parquet",
-   "fct_wait_readings_recent.04a8f78e.parquet",
-   "latest_readings.afdb4497.parquet",
-   "sql/agg_wait_by_hour.cc1ca31c.sql",
-   "sql/agg_wait_by_weekday_hour.3bca5629.sql",
-   "sql/fct_service_standard_monthly.ec1d0646.sql",
-   "stg_cbsa_land_monthly.262b067e.parquet",
-   "summary.44619385522-1.json"
   ]
  }
 ]
