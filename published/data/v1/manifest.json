@@ -1,10 +1,10 @@
 {
  "schema_version": 1,
- "generated_at": "2026-11-20T10:29:36Z",
- "run_id": "44719584094-1",
- "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/44719584094",
+ "generated_at": "2026-11-20T11:36:08Z",
+ "run_id": "44728849189-1",
+ "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/44728849189",
  "git_sha": "2d9940a73b2b44a12f403af810813733abe076a9",
- "data_sha": "02aa12f96e6f91c93ca36e15b74f9bfef0024cbc",
+ "data_sha": "42d8a9574054a74b51da0d798199edf0801868bb",
  "collecting_since": "2026-10-27 19:05:08+00:00",
  "duckdb_version": "1.4.3",
  "dbt_version": "1.12.6",
@@ -16,34 +16,34 @@
    "bytes": 4278
   },
   "fct_wait_readings": {
-   "url": "fct_wait_readings.ee2ea146.parquet",
-   "sha256": "ee2ea146513d44bf00fb1ed7df28aec079f886aebc084c5d25c32b0209b4a256",
-   "rows": 14640,
-   "bytes": 183595
+   "url": "fct_wait_readings.1712f2e8.parquet",
+   "sha256": "1712f2e8cd1b2360960caa439069c9f31fe96eade4a778f443f4c036c6654542",
+   "rows": 14718,
+   "bytes": 185396
   },
   "fct_wait_readings_recent": {
-   "url": "fct_wait_readings_recent.ce78d6a6.parquet",
-   "sha256": "ce78d6a67c3cb8b153fad76b401718dfda37b7a26e5ffa78584beaa85460c5f3",
-   "rows": 14638,
-   "bytes": 183715
+   "url": "fct_wait_readings_recent.fe52933a.parquet",
+   "sha256": "fe52933a73a51805f77dccf595bedb169dc9f6663eb00a0cadf2355e56650bbe",
+   "rows": 14716,
+   "bytes": 185631
   },
   "latest_readings": {
-   "url": "latest_readings.0216bf99.parquet",
-   "sha256": "0216bf99233dac9bfec32d1295c79268600f465fee425fb6bab339acef891e28",
+   "url": "latest_readings.84a7c26a.parquet",
+   "sha256": "84a7c26ab5af676b236763671849b6c18e73192dd028356e3324df6c0ff0aec6",
    "rows": 120,
-   "bytes": 3538
+   "bytes": 3526
   },
   "agg_wait_by_hour": {
-   "url": "agg_wait_by_hour.d8554ded.parquet",
-   "sha256": "d8554ded1b3fbc13ffddc78c244e585db3e8d3328f0d4632267f4d1f43ce3056",
+   "url": "agg_wait_by_hour.674f44af.parquet",
+   "sha256": "674f44afd22082951dbf6fd78297b3d6fd825054ec6dbfa7079234ee4c2e84da",
    "rows": 2693,
-   "bytes": 10364
+   "bytes": 10336
   },
   "agg_wait_by_weekday_hour": {
-   "url": "agg_wait_by_weekday_hour.f27a7a30.parquet",
-   "sha256": "f27a7a3091b31370d2143058441badd11bdb8f0e7547f506a227780104b554e5",
-   "rows": 10518,
-   "bytes": 20040
+   "url": "agg_wait_by_weekday_hour.188c686f.parquet",
+   "sha256": "188c686fc4242767529c30dea1212938f6e7eddce8c0a94c051636bb7a3dac05",
+   "rows": 10531,
+   "bytes": 19972
   },
   "fct_service_standard_monthly": {
    "url": "fct_service_standard_monthly.fbda04b3.parquet",
@@ -76,10 +76,10 @@
    "bytes": 860
   },
   "summary": {
-   "url": "summary.44719584094-1.json",
-   "sha256": "74b2350bf7d250756f91f0aa49df3f2af5ea78d931660fca114d8330c598c103",
+   "url": "summary.44728849189-1.json",
+   "sha256": "b66d3142902e81b467b71149d23d68b64cc96eb7bffb2586395d09c160505890",
    "rows": null,
-   "bytes": 51110
+   "bytes": 51094
   }
  },
  "sources": {
@@ -88,18 +88,18 @@
    "licence": "Open Government Licence \u2013 Canada",
    "licence_url": "https://open.canada.ca/en/open-government-licence-canada",
    "attribution": "Contains information licensed under the Open Government Licence \u2013 Canada.",
-   "last_fetched_at": "2026-11-20 10:29:21+00:00",
-   "newest_source_updated_at": "2026-11-20 11:00:00+00:00",
-   "lag_minutes": 14,
+   "last_fetched_at": "2026-11-20 11:35:55+00:00",
+   "newest_source_updated_at": "2026-11-20 12:20:00+00:00",
+   "lag_minutes": 20,
    "freshness": "pass",
    "last_run": {
     "crossings": 28,
     "rows": 56,
     "timed_rows": 56,
-    "stamped_ahead": 6,
-    "median_age_minutes": 14,
-    "oldest_age_minutes": 1052,
-    "older_than_2h": 4
+    "stamped_ahead": 12,
+    "median_age_minutes": 20,
+    "oldest_age_minutes": 1118,
+    "older_than_2h": 2
    }
   },
   "cbp": {
@@ -107,17 +107,17 @@
    "licence": "Public domain (U.S. government work)",
    "licence_url": "https://www.cbp.gov/site-policy-notices/copyright",
    "attribution": "Source: U.S. Customs and Border Protection",
-   "last_fetched_at": "2026-11-20 10:29:21+00:00",
+   "last_fetched_at": "2026-11-20 11:35:55+00:00",
    "newest_source_updated_at": "2026-11-20 13:00:00+00:00",
-   "lag_minutes": 0,
+   "lag_minutes": 8,
    "freshness": "pass",
    "last_run": {
     "crossings": 30,
     "rows": 60,
-    "timed_rows": 43,
-    "stamped_ahead": 18,
-    "median_age_minutes": 0,
-    "oldest_age_minutes": 29,
+    "timed_rows": 45,
+    "stamped_ahead": 12,
+    "median_age_minutes": 8,
+    "oldest_age_minutes": 95,
     "older_than_2h": 0
    }
   },
@@ -129,12 +129,11 @@
   }
  },
  "cadence": {
-  "runs_24h": 7,
+  "runs_24h": 8,
   "runs_7d": 49,
-  "median_gap_minutes_7d": 174,
+  "median_gap_minutes_7d": 155,
   "max_gap_minutes_7d": 548,
   "recent_runs": [
-   "2026-11-13T11:32:38Z",
    "2026-11-13T16:20:34Z",
    "2026-11-13T18:45:25Z",
    "2026-11-13T22:36:19Z",
@@ -182,7 +181,8 @@
    "2026-11-19T21:30:32Z",
    "2026-11-20T02:36:05Z",
    "2026-11-20T03:12:25Z",
-   "2026-11-20T10:29:21Z"
+   "2026-11-20T10:29:21Z",
+   "2026-11-20T11:35:55Z"
   ]
  },
  "tests": {
@@ -215,23 +215,23 @@
  },
  "quality": {
   "excluded": [],
-  "fetch_timed_readings": 1994,
+  "fetch_timed_readings": 2009,
   "revised_readings": 3
  },
  "cost": {
-  "run_seconds": 15.0,
-  "snapshot_bytes_added": 10652,
-  "data_branch_bytes": 3126041
+  "run_seconds": 14.0,
+  "snapshot_bytes_added": 10650,
+  "data_branch_bytes": 2683878
  },
  "rebuild_check": {
   "model": "agg_wait_by_hour",
   "sql": "sql/agg_wait_by_hour.cc1ca31c.sql",
-  "input": "fct_wait_readings_recent.ce78d6a6.parquet",
+  "input": "fct_wait_readings_recent.fe52933a.parquet",
   "check_sql": "with t as (\n{sql}\n) select count(*) as n, sum(t.n) as sum, md5(string_agg(t::varchar, '|' order by t::varchar)) as md5 from t",
   "expected": {
    "n": 2693,
-   "sum": 12224,
-   "md5": "8c5fc01ebcdccbc4d81c9942876a0214"
+   "sum": 12284,
+   "md5": "a716bba0a835e32aeb79ed7b79162f70"
   }
  },
  "retention": {
