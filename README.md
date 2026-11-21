@@ -9,6 +9,8 @@ scheduler is GitHub Actions cron, which is best-effort: the schedule asks for tw
 median gap between runs in the first weeks was about three hours. The manifest's `cadence` block and
 the page's run strip report what was actually achieved.
 
+[Explore the published estimates](https://brettadams0.github.io/border-waits/). Check the age of a reading, then open the SQL workspace to query the published history.
+
 ## Sources
 
 | Source | URL | Licence |
