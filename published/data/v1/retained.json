@@ -1,5 +1,23 @@
 [
  {
+  "run_id": "44953816057-1",
+  "generated_at": "2026-11-21T21:53:38Z",
+  "files": [
+   "agg_wait_by_hour.64285f38.parquet",
+   "agg_wait_by_weekday_hour.737d9bdd.parquet",
+   "dim_crossing.ee85a427.parquet",
+   "fct_service_standard_monthly.fbda04b3.parquet",
+   "fct_wait_readings.25dd1254.parquet",
+   "fct_wait_readings_recent.9e48eb2a.parquet",
+   "latest_readings.ffe65fd8.parquet",
+   "sql/agg_wait_by_hour.cc1ca31c.sql",
+   "sql/agg_wait_by_weekday_hour.3bca5629.sql",
+   "sql/fct_service_standard_monthly.ec1d0646.sql",
+   "stg_cbsa_land_monthly.262b067e.parquet",
+   "summary.44953816057-1.json"
+  ]
+ },
+ {
   "run_id": "44930304787-1",
   "generated_at": "2026-11-21T17:30:07Z",
   "files": [
