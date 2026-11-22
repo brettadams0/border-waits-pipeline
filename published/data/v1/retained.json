@@ -1,5 +1,23 @@
 [
  {
+  "run_id": "45061724255-1",
+  "generated_at": "2026-11-22T19:37:10Z",
+  "files": [
+   "agg_wait_by_hour.4c566752.parquet",
+   "agg_wait_by_weekday_hour.2afac8cb.parquet",
+   "dim_crossing.ee85a427.parquet",
+   "fct_service_standard_monthly.fbda04b3.parquet",
+   "fct_wait_readings.9479011b.parquet",
+   "fct_wait_readings_recent.6e6e755e.parquet",
+   "latest_readings.005f87a1.parquet",
+   "sql/agg_wait_by_hour.cc1ca31c.sql",
+   "sql/agg_wait_by_weekday_hour.3bca5629.sql",
+   "sql/fct_service_standard_monthly.ec1d0646.sql",
+   "stg_cbsa_land_monthly.262b067e.parquet",
+   "summary.45061724255-1.json"
+  ]
+ },
+ {
   "run_id": "45052711447-1",
   "generated_at": "2026-11-22T18:02:24Z",
   "files": [
@@ -15,24 +33,6 @@
    "sql/fct_service_standard_monthly.ec1d0646.sql",
    "stg_cbsa_land_monthly.262b067e.parquet",
    "summary.45052711447-1.json"
-  ]
- },
- {
-  "run_id": "45016761026-1",
-  "generated_at": "2026-11-22T11:20:17Z",
-  "files": [
-   "agg_wait_by_hour.a966fdb7.parquet",
-   "agg_wait_by_weekday_hour.5740f664.parquet",
-   "dim_crossing.ee85a427.parquet",
-   "fct_service_standard_monthly.fbda04b3.parquet",
-   "fct_wait_readings.b6d926d7.parquet",
-   "fct_wait_readings_recent.c0cc211c.parquet",
-   "latest_readings.f9a9f7bc.parquet",
-   "sql/agg_wait_by_hour.cc1ca31c.sql",
-   "sql/agg_wait_by_weekday_hour.3bca5629.sql",
-   "sql/fct_service_standard_monthly.ec1d0646.sql",
-   "stg_cbsa_land_monthly.262b067e.parquet",
-   "summary.45016761026-1.json"
   ]
  }
 ]
