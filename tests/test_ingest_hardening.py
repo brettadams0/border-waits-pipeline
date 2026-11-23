@@ -28,6 +28,7 @@ def test_fixture_rows_meet_the_row_contract():
     ("cbsa", "2026-13-01 10:00 EDT", False),
     ("cbp", "10/27/2026 At 1:00 pm EDT", True),
     ("cbp", "10/27/2026 At Noon EDT", True),
+    ("cbp", "11/23/2026 At Midnight PST", True),   # published by CBP on 2026-11-23
     ("cbp", "13/45/2026 At 1:00 pm EDT", False),
     ("cbp", "2/30/2026 At 1:00 pm EST", False),
     ("cbp", "10/27/2026 At 13:00 pm EDT", False),

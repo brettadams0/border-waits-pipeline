@@ -8,8 +8,9 @@ MIN_CROSSINGS = 25
 MAX_DELAY = 720
 FORMATS = {
     "cbsa": re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}) [A-Z]{3}$"),
-    # 'At Noon EDT' instead of 'At 12:00 pm EDT' is in fixtures/cbp-bwt.xml (2026-10-27)
-    "cbp": re.compile(r"^(\d{1,2}/\d{1,2}/\d{4}) At (\d{1,2}:\d{2} [ap]m|Noon) [A-Z]{3}$"),
+    # 'At Noon EDT' instead of 'At 12:00 pm EDT' is in fixtures/cbp-bwt.xml (2026-10-27);
+    # 'At Midnight PST' instead of 'At 12:00 am PST' was published on 2026-11-23.
+    "cbp": re.compile(r"^(\d{1,2}/\d{1,2}/\d{4}) At (\d{1,2}:\d{2} [ap]m|Noon|Midnight) [A-Z]{3}$"),
 }
 
 
@@ -23,7 +24,7 @@ def update_time_ok(source, raw):
         if source == "cbsa":
             datetime.strptime(m.group(1), "%Y-%m-%d %H:%M")
         else:
-            clock = "12:00 pm" if m.group(2) == "Noon" else m.group(2)
+            clock = {"Noon": "12:00 pm", "Midnight": "12:00 am"}.get(m.group(2), m.group(2))
             datetime.strptime(f"{m.group(1)} {clock}", "%m/%d/%Y %I:%M %p")
     except ValueError:
         return False

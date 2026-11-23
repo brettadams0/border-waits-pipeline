@@ -9,7 +9,7 @@ scheduler is GitHub Actions cron, which is best-effort: the schedule asks for tw
 median gap between runs in the first weeks was about three hours. The manifest's `cadence` block and
 the page's run strip report what was actually achieved.
 
-[Explore the published estimates](https://brettadams0.github.io/border-waits/). Check the age of a reading, then open the SQL workspace to query the published history.
+[Explore the published estimates](https://brettadams.ca/border-waits/). Check the age of a reading, then open the SQL workspace to query the published history.
 
 ## Sources
 
@@ -157,7 +157,7 @@ Seen in the live feeds and handled in the code (each has a test):
 
 ## The page
 
-`web/` holds the page that brettadams0.github.io serves at `/border-waits/`; the site copies it from
+`web/` holds the page that brettadams.ca serves at `/border-waits/`; the site copies it from
 here (everything but `web/test/`). It reads `manifest.json`, `status.json` and the summary; DuckDB-Wasm
 loads only when the visitor asks for the SQL console. If the live files can't be loaded or fail the
 contract, it shows `web/fallback/`, labelled as a saved snapshot, and the console runs on that.
