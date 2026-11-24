@@ -17,7 +17,7 @@ zoned as (
         case r.source
             when 'cbsa' then try_strptime(substr(r.source_updated_raw, 1, 16), '%Y-%m-%d %H:%M')
             else try_strptime(
-                regexp_replace(replace(r.source_updated_raw, ' At Noon ', ' At 12:00 pm '), ' [A-Z]{3}$', ''),
+                regexp_replace(replace(replace(r.source_updated_raw, ' At Noon ', ' At 12:00 pm '), ' At Midnight ', ' At 12:00 am '), ' [A-Z]{3}$', ''),
                 '%m/%d/%Y At %I:%M %p')
         end as local_raw
     from raw r
