@@ -1,10 +1,10 @@
 {
  "schema_version": 1,
- "generated_at": "2026-11-28T14:31:48Z",
- "run_id": "46155062629-1",
- "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/46155062629",
+ "generated_at": "2026-11-28T18:56:23Z",
+ "run_id": "46178461061-1",
+ "run_url": "https://github.com/brettadams0/border-waits-pipeline/actions/runs/46178461061",
  "git_sha": "38722cfdd8acd25d53b86f17aff77d624a209ba3",
- "data_sha": "6aac34003b9e64102557549cb3b9b03220fb5e0d",
+ "data_sha": "37dcce0be24b55e70977d36f27bc0fe0c12eec47",
  "collecting_since": "2026-10-27 19:05:08+00:00",
  "duckdb_version": "1.4.3",
  "dbt_version": "1.12.6",
@@ -16,34 +16,34 @@
    "bytes": 4278
   },
   "fct_wait_readings": {
-   "url": "fct_wait_readings.ce15a27e.parquet",
-   "sha256": "ce15a27ee18250badf353b1d8cc9e8e0991910405665bcd468900e50065990ba",
-   "rows": 19293,
-   "bytes": 242650
+   "url": "fct_wait_readings.5b2b77fa.parquet",
+   "sha256": "5b2b77fad86e3035db5e30b7a062a619ad55b5e3b4a5dba744df47ca15059393",
+   "rows": 19402,
+   "bytes": 242711
   },
   "fct_wait_readings_recent": {
-   "url": "fct_wait_readings_recent.7a59b8fd.parquet",
-   "sha256": "7a59b8fdc3b5e0a4182b93bec8f80b0676819ca24d520f1418c68efd7b008885",
-   "rows": 16958,
-   "bytes": 213512
+   "url": "fct_wait_readings_recent.c81c9627.parquet",
+   "sha256": "c81c96279b6839d707bd8283dedf44883a48d864789a8b2556d5248960656d6e",
+   "rows": 16875,
+   "bytes": 212644
   },
   "latest_readings": {
-   "url": "latest_readings.905d4f6e.parquet",
-   "sha256": "905d4f6ebc3c299b436acdcc65e823ceacaa408c239d900df9db448d486e2342",
+   "url": "latest_readings.87514f7c.parquet",
+   "sha256": "87514f7c2cea2bf15ed1ecfdad7d8564d87c212796474034459dc501211c003e",
    "rows": 120,
-   "bytes": 3559
+   "bytes": 3630
   },
   "agg_wait_by_hour": {
-   "url": "agg_wait_by_hour.cd87cc0d.parquet",
-   "sha256": "cd87cc0dd8b3b4bf503f677e0b0c36195527049aa22b8013cd3ba1730d1e2511",
+   "url": "agg_wait_by_hour.59df0065.parquet",
+   "sha256": "59df00659b8e1f5af7094eedfc91dddd9650b4803c05b3ac52a5574ec77554b8",
    "rows": 2707,
-   "bytes": 10689
+   "bytes": 10712
   },
   "agg_wait_by_weekday_hour": {
-   "url": "agg_wait_by_weekday_hour.11655924.parquet",
-   "sha256": "116559240e85c057c7d3b6a2bd177aeccdb980c90e8e1ffbce22dfc463e6ed17",
-   "rows": 12179,
-   "bytes": 23850
+   "url": "agg_wait_by_weekday_hour.e25f8229.parquet",
+   "sha256": "e25f8229687f2078828198c62be8ba14cd5981ac36a6ebdf421b1c8026f8b453",
+   "rows": 12195,
+   "bytes": 23689
   },
   "fct_service_standard_monthly": {
    "url": "fct_service_standard_monthly.fbda04b3.parquet",
@@ -76,10 +76,10 @@
    "bytes": 860
   },
   "summary": {
-   "url": "summary.46155062629-1.json",
-   "sha256": "a2b7e42e75f447d6ce39f6080c9dff3cad63dad7a883298f72a049cc400f4b3d",
+   "url": "summary.46178461061-1.json",
+   "sha256": "8537473631e2862165ddef0afb6bbe095398f279f477c03e064fee8ff8cba02a",
    "rows": null,
-   "bytes": 52319
+   "bytes": 52349
   }
  },
  "sources": {
@@ -88,18 +88,18 @@
    "licence": "Open Government Licence \u2013 Canada",
    "licence_url": "https://open.canada.ca/en/open-government-licence-canada",
    "attribution": "Contains information licensed under the Open Government Licence \u2013 Canada.",
-   "last_fetched_at": "2026-11-28 14:31:32+00:00",
-   "newest_source_updated_at": "2026-11-28 15:20:00+00:00",
-   "lag_minutes": 16,
+   "last_fetched_at": "2026-11-28 18:56:08+00:00",
+   "newest_source_updated_at": "2026-11-28 19:40:00+00:00",
+   "lag_minutes": 41,
    "freshness": "pass",
    "last_run": {
     "crossings": 29,
     "rows": 58,
     "timed_rows": 58,
-    "stamped_ahead": 10,
-    "median_age_minutes": 16,
-    "oldest_age_minutes": 256,
-    "older_than_2h": 2
+    "stamped_ahead": 12,
+    "median_age_minutes": 41,
+    "oldest_age_minutes": 521,
+    "older_than_2h": 4
    }
   },
   "cbp": {
@@ -107,18 +107,18 @@
    "licence": "Public domain (U.S. government work)",
    "licence_url": "https://www.cbp.gov/site-policy-notices/copyright",
    "attribution": "Source: U.S. Customs and Border Protection",
-   "last_fetched_at": "2026-11-28 14:31:32+00:00",
+   "last_fetched_at": "2026-11-28 18:56:08+00:00",
    "newest_source_updated_at": "2026-11-29 04:00:00+00:00",
-   "lag_minutes": 31,
+   "lag_minutes": 56,
    "freshness": "pass",
    "last_run": {
     "crossings": 30,
     "rows": 60,
-    "timed_rows": 49,
+    "timed_rows": 51,
     "stamped_ahead": 11,
-    "median_age_minutes": 31,
-    "oldest_age_minutes": 211,
-    "older_than_2h": 2
+    "median_age_minutes": 56,
+    "oldest_age_minutes": 476,
+    "older_than_2h": 4
    }
   },
   "cbsa_history": {
@@ -129,13 +129,11 @@
   }
  },
  "cadence": {
-  "runs_24h": 6,
-  "runs_7d": 39,
-  "median_gap_minutes_7d": 240,
+  "runs_24h": 7,
+  "runs_7d": 38,
+  "median_gap_minutes_7d": 244,
   "max_gap_minutes_7d": 1183,
   "recent_runs": [
-   "2026-11-21T16:24:12Z",
-   "2026-11-21T17:29:49Z",
    "2026-11-21T21:53:19Z",
    "2026-11-21T23:13:50Z",
    "2026-11-22T02:39:30Z",
@@ -172,7 +170,8 @@
    "2026-11-28T01:57:55Z",
    "2026-11-28T04:57:09Z",
    "2026-11-28T10:24:24Z",
-   "2026-11-28T14:31:32Z"
+   "2026-11-28T14:31:32Z",
+   "2026-11-28T18:56:08Z"
   ]
  },
  "tests": {
@@ -211,23 +210,23 @@
  },
  "quality": {
   "excluded": [],
-  "fetch_timed_readings": 2516,
+  "fetch_timed_readings": 2525,
   "revised_readings": 3
  },
  "cost": {
-  "run_seconds": 16.0,
-  "snapshot_bytes_added": 10743,
-  "data_branch_bytes": 3344255
+  "run_seconds": 15.0,
+  "snapshot_bytes_added": 10862,
+  "data_branch_bytes": 3359323
  },
  "rebuild_check": {
   "model": "agg_wait_by_hour",
   "sql": "sql/agg_wait_by_hour.cc1ca31c.sql",
-  "input": "fct_wait_readings_recent.7a59b8fd.parquet",
+  "input": "fct_wait_readings_recent.c81c9627.parquet",
   "check_sql": "with t as (\n{sql}\n) select count(*) as n, sum(t.n) as sum, md5(string_agg(t::varchar, '|' order by t::varchar)) as md5 from t",
   "expected": {
    "n": 2707,
-   "sum": 14245,
-   "md5": "03e51b76077125a2019034c85cd9222f"
+   "sum": 14173,
+   "md5": "058068b095dda2dc66b5badf3c89a961"
   }
  },
  "retention": {
